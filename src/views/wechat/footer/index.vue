@@ -78,8 +78,7 @@ const props = defineProps({
 })
 const emits = defineEmits(['sendBtn'])
 // 发送的信息类型 0系统，1文字 2图片 3路由。。。
-const type = ref(1),
-      footerDom = ref(),
+const footerDom = ref(),
       value = ref();
 
 const footerHeight = () => nextTick(() => {
@@ -95,7 +94,7 @@ watch(() => state.moreShow, () => footerHeight())
 
 const sendBtn = () => {
   const val = editInputValue.input.trim()
-  if(val.length) emits('sendBtn', val, type.value)
+  if(val.length) emits('sendBtn', val, 1)
   editInputValue.input = ''
   editInputValue.sendBtnShow = false
 }
@@ -105,17 +104,10 @@ const funBtn = (id: number) => {
 }
 
 const inputChange = (event: Event, id: number) => {
-  let input = event.target as HTMLInputElement
-  let files = input.files
-  console.log(files)
+  let files = (event.target as HTMLInputElement).files
+  if(!files) return
+  emits('sendBtn', files, 2)
 }
-
-
-
-
-
-
-
 
 
 const beforeEnter = (el: Element) => {

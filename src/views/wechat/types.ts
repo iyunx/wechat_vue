@@ -7,7 +7,7 @@ type TUser = {
 type TLists = {
   id?: number
   type: number
-  content: string
+  content: any
   room_id: string
   user_id: string
   user: TUser,

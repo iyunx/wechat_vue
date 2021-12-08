@@ -18,11 +18,11 @@
         </aside>
         <section>
           <article v-if="item.type === 1" v-html='item.content'></article>
-          <!-- <div>
-            <img v-if="item.type === 2" :src="item.msg" alt="">
-            <video v-if="item.type === 3" :src="item.msg" controls></video>
-            <app-audio v-if="item.type === 6" :src="item.msg" :code='item.code'></app-audio>
-          </div> -->
+          <div v-else>
+            <img v-if="item.type === 2" :src="item.content.url" :alt="item.content.name">
+            <video v-if="item.type === 3" :src="item.content.url" controls></video>
+            <!-- <app-audio v-if="item.type === 6" :src="item.msg" :code='item.code'></app-audio> -->
+          </div>
         </section>
       </li>
     </template>
@@ -35,14 +35,15 @@ import AppHeader from '../layout/header.vue';
 import AppAudio from '../../components/audio/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
-import { roomShow, contactUpdate } from '../../api/room'
+import { roomShow, contactUpdate, imgUpload } from '../../api/room'
 import { onMounted, reactive, ref, nextTick } from 'vue'
 import { USER } from '../../libs/vuex';
 import moment from '../../libs/moment';
 import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
-
+console.log(moment().valueOf())
+console.log(moment().format('Y/M/D h:mm:ss'))
 const route = useRoute(),
       roomId = route.params.id as string,
       listDom = ref<HTMLUListElement>(),
@@ -64,15 +65,44 @@ socket.on('message', data => {
   setScrollTop(listDom.value)
 })
 
-const chatListBtn = (msg: string, room: string, type: number) => {
+const chatListBtn = (msg: any, room: string, type: number) => {
   socket.emit('message', msg, room, type)
 }
 
-const sendBtn = (msg: string, type: number) => {
-  // 房间内页
-  chatListBtn(msg, roomId, type)
-  // 房间列表页
-  roomListBtn(roomId, chatList.user.fid, type, msg)
+const sendBtn = async (val: any, type: number) => {
+  switch (type) {
+    case 1:
+      // 房间内页
+      chatListBtn(val, roomId, type)
+      // 房间列表页
+      roomListBtn(roomId, chatList.user.fid, type, val)
+      break;
+    case 2:
+      // const files: File[] = val.getAll('files')
+      const tp = val[Object.values(val).length - 1].type.split('/')[0]
+      const typelist = [
+        {id: 2, type: 'image', title: '[图片]'},
+        {id: 3, type: 'video', title: '[视频]'}
+      ]
+      const ty = typelist.find(item => item.type == tp) || {id: 4, title: '[文件]'};
+      const arr: any[] = [];
+      (Object.values(val) as File[]).forEach(item => {
+        arr.push({type: item.type, name: item.name, file: item})
+      })
+      const form = new FormData()
+      for (const file of (Object.values(val) as File[])) {
+        form.append('files', file)
+      }
+      
+      const info = await imgUpload(form)
+      // 房间内页
+      chatListBtn(info.data, roomId, ty.id)
+      // 房间列表页
+      roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
+      break
+    default:
+      break;
+  }
 }
 
 const setScrollTop = (dom: HTMLUListElement | undefined) => nextTick(() => dom && (dom.scrollTop = dom.scrollHeight))
