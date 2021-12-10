@@ -19,14 +19,24 @@
         <section>
           <article v-if="item.type === 1" v-html='item.content'></article>
           <div v-else>
-            <img v-if="item.type === 2" :src="item.content.url" :alt="item.content.name">
-            <video v-if="item.type === 3" :src="item.content.url" controls></video>
+            <img v-if="item.type === 2" :src="item.content" @click="imgOpenBtn(item.content)">
+            <video v-if="item.type === 3" :src="item.content" controls></video>
+            <a :href='item.content.url' class="file" v-if="item.type === 4">
+              <div class="file-flex">
+                <span>{{item.content.name.slice(0, 42)}}</span>
+                <i>1mb</i>
+              </div>
+              <img :src="fileUrl">
+            </a>
             <!-- <app-audio v-if="item.type === 6" :src="item.msg" :code='item.code'></app-audio> -->
           </div>
         </section>
       </li>
     </template>
   </ul>
+  
+  <van-image-preview v-model:show="imgSwiper.show" :start-position='imgSwiper.index' :images="imgSwiper.images" @change="imgCloseBtn">
+  </van-image-preview>
   <app-footer v-model:dom='listDom' @sendBtn='sendBtn'></app-footer>
 </template>
 
@@ -42,8 +52,8 @@ import moment from '../../libs/moment';
 import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
-console.log(moment().valueOf())
-console.log(moment().format('Y/M/D h:mm:ss'))
+import fileUrl from '../../assets/files.png'
+
 const route = useRoute(),
       roomId = route.params.id as string,
       listDom = ref<HTMLUListElement>(),
@@ -51,18 +61,26 @@ const route = useRoute(),
       chatList = reactive<IBase>({
         lists: [],
         user: {}
+      }),
+      imgSwiper = reactive<{show: boolean, images: string[], index: number}>({
+        show: false,
+        images: [],
+        index: 2
       })
 
 const getChatLists = async () => {
   let data = await roomShow(roomId)
   chatList.user = data.users
   chatList.lists = data.chats
+  data.chats.forEach((item: any) => {
+    if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
+  })
   roomJoin(roomId)
 }
 
 socket.on('message', data => {
   data.room_id == roomId && chatList.lists.push(data)
-  setScrollTop(listDom.value)
+  setScrollTop()
 })
 
 const chatListBtn = (msg: any, room: string, type: number) => {
@@ -78,7 +96,6 @@ const sendBtn = async (val: any, type: number) => {
       roomListBtn(roomId, chatList.user.fid, type, val)
       break;
     case 2:
-      // const files: File[] = val.getAll('files')
       const tp = val[Object.values(val).length - 1].type.split('/')[0]
       const typelist = [
         {id: 2, type: 'image', title: '[图片]'},
@@ -93,6 +110,7 @@ const sendBtn = async (val: any, type: number) => {
       for (const file of (Object.values(val) as File[])) {
         form.append('files', file)
       }
+      form.set('room_id', roomId)
       
       const info = await imgUpload(form)
       // 房间内页
@@ -105,9 +123,30 @@ const sendBtn = async (val: any, type: number) => {
   }
 }
 
-const setScrollTop = (dom: HTMLUListElement | undefined) => nextTick(() => dom && (dom.scrollTop = dom.scrollHeight))
+const setScrollTop = () => nextTick(() => {
+  let dom = listDom.value
+  if(dom) {
+    console.dir(dom)
+    console.log(dom.scrollHeight)
+    setTimeout(() => {
+      console.log(listDom.value?.scrollHeight)
+    })
+  }
+  dom && (dom.scrollTop = ref(dom.scrollHeight).value)
+})
 
 const updateContact = async (num = 0) => await contactUpdate(roomId, {num})
+
+const imgOpenBtn = (img: string) => {
+  let i = imgSwiper.images.findIndex(item => item.includes(img))
+  imgSwiper.index = i
+  imgSwiper.show = true
+}
+
+const imgCloseBtn = (newIndex: number) => {
+  imgSwiper.index = newIndex
+}
+
 
 onMounted(async () => {
   const rom = roomlistArr.lists.find(item => item.id == roomId);
@@ -119,7 +158,7 @@ onMounted(async () => {
    */
   getChatLists()
     .then(() => {
-      setScrollTop(listDom.value)
+      setScrollTop()
       if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
         updateContact()
         if(rom && rom.roomset.num) {
@@ -127,6 +166,7 @@ onMounted(async () => {
           rom.roomset.num = 0
         }
       }
+      setScrollTop()
     })
 })
 
@@ -144,9 +184,9 @@ onMounted(async () => {
     aside{
       margin-right: 10px;
       a{
-          width: 44px;
-          height: 44px;
-          display: block;
+        width: 44px;
+        height: 44px;
+        display: block;
         .avatar{
           display: inline-block;
           width: 100%;
@@ -166,10 +206,38 @@ onMounted(async () => {
       div{
         display: inline-block;
         img{
-          max-width: 100%;
+          max-width: 60%;
         }
         video{
           max-width: 100%;
+        }
+        .file{
+          background-color: white;
+          height: 4.4rem;
+          width: 14rem;
+          display: flex;
+          padding: .5rem;
+          box-sizing: border-box;
+          border-radius: .5rem;
+          .file-flex{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            span{
+              font-size: .8rem;
+            }
+            i{
+              font-size: .6rem;
+              font-style: normal;
+              color: #666;
+            }
+          }
+          img{
+            margin: .4rem 0 0 .6rem;
+            width: 3rem;
+            height: 2.6rem;
+          }
         }
       }
       article{
@@ -195,7 +263,11 @@ onMounted(async () => {
           text-align: right;
         }
         div{
+          overflow: hidden;
           float: right;
+          img, video, .file{
+            float: right;
+          }
         }
         article{
           float: right;

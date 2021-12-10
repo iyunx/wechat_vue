@@ -9,7 +9,8 @@ import {
   Form, Field, CellGroup,
   Toast,
   Popup,
-  Switch
+  Switch,
+  ImagePreview
 } from 'vant'
 
 const vants = [
@@ -21,7 +22,8 @@ const vants = [
   Form, Field, CellGroup,
   Toast,
   Popup,
-  Switch
+  Switch,
+  ImagePreview
 ]
 
 export default {
