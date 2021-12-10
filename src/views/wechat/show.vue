@@ -6,7 +6,7 @@
       </router-link>
     </template>
   </app-header>
-  <ul class="chat init" ref='listDom' id='chatlist'>
+  <ul class="chat init" ref='listDom' id='chatlist' v-chat-directive='null'>
     <template v-for="item in chatList.lists" :key="item.id">
       <div v-if='!item.type' class="notify">
         <span>{{moment(item.created_at).locale('zh-tw').fromNow()}}</span>
@@ -26,9 +26,8 @@
                 <span>{{item.content.name.slice(0, 42)}}</span>
                 <i>1mb</i>
               </div>
-              <img :src="fileUrl">
+              <img :src="fileUrl" />
             </a>
-            <!-- <app-audio v-if="item.type === 6" :src="item.msg" :code='item.code'></app-audio> -->
           </div>
         </section>
       </li>
@@ -53,6 +52,7 @@ import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
 import fileUrl from '../../assets/files.png'
+import vChatDirective from '../../directives/Chat'
 
 const route = useRoute(),
       roomId = route.params.id as string,
@@ -68,19 +68,29 @@ const route = useRoute(),
         index: 2
       })
 
-const getChatLists = async () => {
-  let data = await roomShow(roomId)
-  chatList.user = data.users
-  chatList.lists = data.chats
-  data.chats.forEach((item: any) => {
-    if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
+roomShow(roomId)
+  .then((data) => {
+    chatList.user = data.users
+    chatList.lists = data.chats
+    data.chats.forEach((item: any) => {
+      if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
+    })
+    roomJoin(roomId)
   })
-  roomJoin(roomId)
-}
+  .then(() => {
+    const rom = roomlistArr.lists.find(item => item.id == roomId);
+      if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
+        updateContact()
+        if(rom && rom.roomset.num) {
+          !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
+          rom.roomset.num = 0
+        }
+      }
+  })
 
 socket.on('message', data => {
   data.room_id == roomId && chatList.lists.push(data)
-  setScrollTop()
+  setScrollTop(listDom.value as HTMLUListElement)
 })
 
 const chatListBtn = (msg: any, room: string, type: number) => {
@@ -123,18 +133,6 @@ const sendBtn = async (val: any, type: number) => {
   }
 }
 
-const setScrollTop = () => nextTick(() => {
-  let dom = listDom.value
-  if(dom) {
-    console.dir(dom)
-    console.log(dom.scrollHeight)
-    setTimeout(() => {
-      console.log(listDom.value?.scrollHeight)
-    })
-  }
-  dom && (dom.scrollTop = ref(dom.scrollHeight).value)
-})
-
 const updateContact = async (num = 0) => await contactUpdate(roomId, {num})
 
 const imgOpenBtn = (img: string) => {
@@ -147,28 +145,7 @@ const imgCloseBtn = (newIndex: number) => {
   imgSwiper.index = newIndex
 }
 
-
-onMounted(async () => {
-  const rom = roomlistArr.lists.find(item => item.id == roomId);
-
-  /**
-   * 滚动条始终在底部！
-   * roomlistArr 房间列表页
-   * chatList 聊天内容列表页
-   */
-  getChatLists()
-    .then(() => {
-      setScrollTop()
-      if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
-        updateContact()
-        if(rom && rom.roomset.num) {
-          !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
-          rom.roomset.num = 0
-        }
-      }
-      setScrollTop()
-    })
-})
+const setScrollTop = (dom: HTMLUListElement) => nextTick(() => dom.scrollTop += dom.scrollHeight)
 
 </script>
 
