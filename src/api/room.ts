@@ -42,7 +42,8 @@ const roomDestroy = async (id: string) => {
 }
 
 const imgUpload = async (file: any) => {
-  return ((await axios.post('/room/upload', file)).data) as IMessage
+  const data = ((await axios.post('/room/upload', file)).data) as IMessage
+  return data.data
 }
 
 export {

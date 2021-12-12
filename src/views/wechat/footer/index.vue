@@ -1,72 +1,67 @@
 <template>
-  <transition
-    :css="false"
-    @before-enter="beforeEnter"
-    @enter="enter"
-    @after-enter="afterEnter"
-    @before-leave="beforeLeave"
-    @leave="leave"
-    @after-leave="afterLeave">
-  <div class="chat-footer" ref='footerDom'>
-    <div class="chat-footer-t">
-      <aside>
-        <van-icon @click="isAudioBtn" v-show="state.isInput" name="volume-o" />
-        <van-icon @click="isAudioBtn" v-show="!state.isInput" name="chat-o" />
-      </aside>
+  <div class="footer">
+    <transition :css="false" >
+      <div class="chat-footer" ref='footerDom'>
+        <div class="chat-footer-t">
+          <aside>
+            <van-icon @click="isAudioBtn" v-show="state.isInput" name="volume-o" />
+            <van-icon @click="isAudioBtn" v-show="!state.isInput" name="chat-o" />
+          </aside>
 
-      <section>
-        <button v-if="state.isAudio">按住 说话</button>
-        <edit-input
-          v-model='editInputValue.input'
-          v-show='state.isInput'
-          @change='editInputChange'
-        ></edit-input>
-      </section>
-      
-      <div class="icon-right">
-        <div class='icon-chat-smile' :class='{"icon-chat-smile-w": editInputValue.sendBtnShow}'>
-          <van-icon @click="chatBtn" v-if="state.isChat" name="chat-o" />
-          <van-icon @click="chatBtn" v-else name="smile-o" />
-        </div>
-        <transition name="addShow">
-          <van-icon @click="moreBtn" v-if='!editInputValue.sendBtnShow' class="addBtn" name="add-o" />
-          <button v-else @click="sendBtn" class="sendBtn">发送</button>
-        </transition>
-        <aside></aside>
-      </div>
-    </div>
-
-    <div class="chat-footer-b">
-      <div v-show='state.faceShow' class="chat-footer-height">
-        <ul class="icon-type">
-          <li v-for="(item, i) in state.bIconList" :class="{currentLi: state.bIconCurrent === i}"><van-icon :name="item" /></li>
-        </ul>
-        <emo-inco
-          v-show='state.bIconCurrent == 1'
-          @change='emoChange'
-        ></emo-inco>
-        <van-icon class="chat-footer-clear" name="close" />
-      </div>
-
-      <div v-show='state.moreShow' class="chat-footer-height">
-        <ul class="icon-fun">
-          <li v-for="item in state.funList" @click="funBtn(item.id)" :key="item.id">
-            <div class="icon-fun-icon">
-              <input v-model='value' :type="item.type" @change="inputChange($event, item.id)" multiple>
-              <van-icon :name="item.name" />
+          <section>
+            <button v-if="state.isAudio">按住 说话</button>
+            <edit-input
+              v-model='editInputValue.input'
+              v-show='state.isInput'
+              @change='editInputChange'
+            ></edit-input>
+          </section>
+          
+          <div class="icon-right">
+            <div class='icon-chat-smile' :class='{"icon-chat-smile-w": editInputValue.sendBtnShow}'>
+              <van-icon @click="chatBtn" v-if="state.isChat" name="chat-o" />
+              <van-icon @click="chatBtn" v-else name="smile-o" />
             </div>
-            <span>{{item.title}}</span>
-          </li>
-        </ul>
-        <div class="icon-fun-swiper"></div>
+            <transition name="addShow">
+              <van-icon @click="moreBtn" v-if='!editInputValue.sendBtnShow' class="addBtn" name="add-o" />
+              <button v-else @click="sendBtn" class="sendBtn">发送</button>
+            </transition>
+            <aside></aside>
+          </div>
+        </div>
+
+        <div class="chat-footer-b">
+          <div v-show='state.faceShow' class="chat-footer-height">
+            <ul class="icon-type">
+              <li v-for="(item, i) in state.bIconList" :class="{currentLi: state.bIconCurrent === i}"><van-icon :name="item" /></li>
+            </ul>
+            <emo-inco
+              v-show='state.bIconCurrent == 1'
+              @change='emoChange'
+            ></emo-inco>
+            <van-icon class="chat-footer-clear" name="close" />
+          </div>
+
+          <div v-show='state.moreShow' class="chat-footer-height">
+            <ul class="icon-fun">
+              <li v-for="item in state.funList" @click="funBtn(item.id)" :key="item.id">
+                <div class="icon-fun-icon">
+                  <input v-model='value' :type="item.type" @change="inputChange($event, item.id)" multiple>
+                  <van-icon :name="item.name" />
+                </div>
+                <span>{{item.title}}</span>
+              </li>
+            </ul>
+            <div class="icon-fun-swiper"></div>
+          </div>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
-  </transition>
 </template>
 
 <script lang='ts' setup>
-import { onUnmounted, ref, watch, nextTick } from 'vue'
+import { onBeforeUnmount, ref, watch, nextTick } from 'vue'
 import emoInco from '../../../components/emoji/index.vue'
 import editInput from '../../../components/editInput/index.vue'
 import { state, isAudioBtn, chatBtn, moreBtn } from './radioOrInput'
@@ -100,62 +95,33 @@ const sendBtn = () => {
 }
 
 const funBtn = (id: number) => {
-  console.log(id)
+  // console.log(id)
 }
 
 const inputChange = (event: Event, id: number) => {
-  let files = (event.target as HTMLInputElement).files
-  if(!files) return
-  emits('sendBtn', files, 2)
+  if(id == 1){
+    let files = (event.target as HTMLInputElement).files
+    if(!files) return
+    emits('sendBtn', files, 2)
+  }
 }
 
-
-const beforeEnter = (el: Element) => {
-  let om = el as HTMLElement
-  om.style.transform = 'translateY(100%)';
-  (el as HTMLElement).scrollHeight
-}
-
-const enter = (el: Element, done: Function) => {
-  let om = el as HTMLElement
-  om.offsetHeight
-  om.style.transform = 'translateY(0)';
-  om.style.transition = 'all 1s'
-  setTimeout(() => done(), 3000)
-  // om.style.transition = 'all .3s ease'
-}
-
-const afterEnter = () => {
-  
-}
-
-const beforeLeave = (el: Element) => {
-  let om = el as HTMLDivElement
-  om.style.transform = 'translateY(0)';
-}
-
-const leave = (el: Element, done: Function) => {
-  let om = el as HTMLElement
-  om.offsetHeight
-  om.style.transform = 'translateY(100%)';
-  // om.style.transition = 'all 1s'
-  done()
-}
-
-const afterLeave = (el: Element) => {
-  let om = el as HTMLElement
-  om.style.transform = 'translateY(100%)';
-}
-
-onUnmounted(() => {
+onBeforeUnmount(() => {
   state.isAudio = false;
   state.isInput = true;
   state.isChat = true;
   state.faceShow = false;
+  state.moreShow = false;
 })
 </script>
 
 <style lang='less' scoped>
+// .footer{
+//   position: absolute;
+//   inset: 0;
+//   // background-color: red;
+//   // z-index: 100;
+// }
 .chat-footer{
   position: fixed;
   bottom: 0;

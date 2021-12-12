@@ -36,13 +36,19 @@ import { roomlistArr, roomListSort } from '../../api/socket';
 
 roomIndex()
   .then(data => {
-    // 先初始化为0 ，再叠加
+    // 先初始化为0 ，再叠加未读信息总数
     roomlistArr.count = 0
     data.rooms.forEach((room: any) => {
       !room.roomset.disturb && (roomlistArr.count += room.roomset.num)
       switch(room.chat.type){
         case 2:
-          room.chat.msg = '文件';
+          room.chat.msg = '[图片]';
+          break;
+        case 3:
+          room.chat.msg = '[视频]';
+          break;
+        case 4:
+          room.chat.msg = '[文件]';
           break;
       }
     })

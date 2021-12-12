@@ -21,23 +21,15 @@ const findRoom = () => {
   return roomlistArr.lists.find(item => item.id === isBox.roomId)
 }
 
-const isRead = computed(() => {
-  let room = findRoom()
-  if(room) return findRoom().roomset.num
-  return 0
-})
+const isRead = computed(() => findRoom().roomset.num)
 
-const isTop = computed(() => {
-  let room = findRoom()
-  if(room) return !room.roomset.top
-  return false
-})
+const isTop = computed(() => !findRoom().roomset.top)
 
 const readBtn = async () => {
   let num = isRead.value > 0 ? 0 : 1;
   await contactUpdate(isBox.roomId, {num})
   let room = findRoom()
-  room.roomset.disturb && (roomlistArr.count -= room.roomset.num)
+  !room.roomset.disturb && num ? (roomlistArr.count += num) : (roomlistArr.count -= isRead.value)
   room.roomset.num = num
 }
 

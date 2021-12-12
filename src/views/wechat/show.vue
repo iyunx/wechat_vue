@@ -98,15 +98,37 @@ const onRefresh = () => {
   setTimeout(async () => {
     loading.value = false;
     const data = await roomShow(roomId, pager)
-    console.log(data)
     chatList.lists.unshift(...data.chats.rows)
+    imgSwiper.images = []
+    chatList.lists.forEach((item: any) => {
+      if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
+    })
   }, 1000)
 }
 
 // 接受实时聊天信息
 socket.on('message', data => {
-  data.room_id == roomId && chatList.lists.push(data)
-  setScrollTop(chatDom.value as HTMLUListElement)
+  if(data.room_id == roomId){
+    switch(data.type){
+      case 1:
+        chatList.lists.push(data)
+        break;
+      case 2:
+        data.content.forEach(item => {
+          chatList.lists.push({
+            type: item.type,
+            content: item.path,
+            room_id: data.room_id,
+            user_id: data.user_id,
+            user: data.user,
+            created_at: moment().format('YYYY-MM-DD H:i:s'),
+            updated_at: moment().format('YYYY-MM-DD H:i:s')
+          })
+        })
+        break;
+    }
+    setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
+  }
 })
 // 发送实时聊天信息
 const chatListBtn = (msg: any, room: string, type: number) => {
@@ -140,7 +162,7 @@ const sendBtn = async (val: any, type: number) => {
       
       const info = await imgUpload(form)
       // 房间内页
-      chatListBtn(info.data, roomId, ty.id)
+      chatListBtn(info, roomId, ty.id)
       // 房间列表页
       roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
       break
