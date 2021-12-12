@@ -10,7 +10,8 @@ import {
   Toast,
   Popup,
   Switch,
-  ImagePreview
+  ImagePreview,
+  PullRefresh
 } from 'vant'
 
 const vants = [
@@ -23,7 +24,8 @@ const vants = [
   Toast,
   Popup,
   Switch,
-  ImagePreview
+  ImagePreview,
+  PullRefresh
 ]
 
 export default {

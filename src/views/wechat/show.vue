@@ -6,7 +6,9 @@
       </router-link>
     </template>
   </app-header>
-  <ul class="chat init" ref='listDom' id='chatlist' v-chat-directive='null'>
+  <ul class="chat init" ref='chatDom' id='chatlist'>
+    <van-pull-refresh v-model="loading" @refresh="onRefresh">
+
     <template v-for="item in chatList.lists" :key="item.id">
       <div v-if='!item.type' class="notify">
         <span>{{moment(item.created_at).locale('zh-tw').fromNow()}}</span>
@@ -32,11 +34,12 @@
         </section>
       </li>
     </template>
+    </van-pull-refresh>
   </ul>
   
   <van-image-preview v-model:show="imgSwiper.show" :start-position='imgSwiper.index' :images="imgSwiper.images" @change="imgCloseBtn">
   </van-image-preview>
-  <app-footer v-model:dom='listDom' @sendBtn='sendBtn'></app-footer>
+  <app-footer v-model:dom='chatDom' @sendBtn='sendBtn'></app-footer>
 </template>
 
 <script lang='ts' setup>
@@ -52,13 +55,14 @@ import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
 import fileUrl from '../../assets/files.png'
-import vChatDirective from '../../directives/Chat'
+import { Toast } from 'vant';
 
 const route = useRoute(),
       roomId = route.params.id as string,
-      listDom = ref<HTMLUListElement>(),
+      chatDom = ref<HTMLUListElement>(),
       me = USER.value as any,
       chatList = reactive<IBase>({
+        count: 0,
         lists: [],
         user: {}
       }),
@@ -66,33 +70,45 @@ const route = useRoute(),
         show: false,
         images: [],
         index: 2
-      })
+      }),
+      pager = reactive({
+        page: 1,
+        size: 20
+      }),
+      loading = ref(false)
 
-roomShow(roomId)
-  .then((data) => {
-    chatList.user = data.users
-    chatList.lists = data.chats
-    data.chats.forEach((item: any) => {
-      if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
-    })
-    roomJoin(roomId)
+// 信息列表
+const getChatLists = async () => {
+  const data = await roomShow(roomId, pager)
+  chatList.user = data.friend
+  chatList.lists = data.chats.rows
+  chatList.count = data.chats.count
+  data.chats.rows.forEach((item: any) => {
+    if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
   })
-  .then(() => {
-    const rom = roomlistArr.lists.find(item => item.id == roomId);
-      if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
-        updateContact()
-        if(rom && rom.roomset.num) {
-          !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
-          rom.roomset.num = 0
-        }
-      }
-  })
+  roomJoin(roomId)
+}
+// 下拉加载
+const onRefresh = () => {
+  if(chatList.count <= chatList.lists.length) {
+    Toast.success('已经全部加载')
+    return loading.value = false;
+  };
+  pager.page += 1
+  setTimeout(async () => {
+    loading.value = false;
+    const data = await roomShow(roomId, pager)
+    console.log(data)
+    chatList.lists.unshift(...data.chats.rows)
+  }, 1000)
+}
 
+// 接受实时聊天信息
 socket.on('message', data => {
   data.room_id == roomId && chatList.lists.push(data)
-  setScrollTop(listDom.value as HTMLUListElement)
+  setScrollTop(chatDom.value as HTMLUListElement)
 })
-
+// 发送实时聊天信息
 const chatListBtn = (msg: any, room: string, type: number) => {
   socket.emit('message', msg, room, type)
 }
@@ -132,20 +148,34 @@ const sendBtn = async (val: any, type: number) => {
       break;
   }
 }
-
+// 未读消息设定为已读
 const updateContact = async (num = 0) => await contactUpdate(roomId, {num})
-
+// 聊天图片 全屏轮播
 const imgOpenBtn = (img: string) => {
   let i = imgSwiper.images.findIndex(item => item.includes(img))
   imgSwiper.index = i
   imgSwiper.show = true
 }
 
-const imgCloseBtn = (newIndex: number) => {
-  imgSwiper.index = newIndex
-}
+const imgCloseBtn = (newIndex: number) => imgSwiper.index = newIndex
+// 滚动条在最底部
+const setScrollTop = (dom: HTMLUListElement) => nextTick(() => dom.scrollTop = dom.scrollHeight)
 
-const setScrollTop = (dom: HTMLUListElement) => nextTick(() => dom.scrollTop += dom.scrollHeight)
+onMounted(() => {
+  const rom = roomlistArr.lists.find(item => item.id == roomId);
+  getChatLists()
+    .then(() => {
+      setScrollTop(chatDom.value as HTMLUListElement)
+      setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
+      if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
+        updateContact()
+        if(rom && rom.roomset.num) {
+          !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
+          rom.roomset.num = 0
+        }
+      }
+    })
+})
 
 </script>
 

@@ -16,6 +16,7 @@ type TLists = {
 }
 
 interface IBase {
+  count: number
   lists: TLists[],
   user: any
 }

@@ -10,8 +10,8 @@ const roomStore = async (id: string) => {
   return ((await axios.post('/room/store', id)).data) as IMessage
 }
 
-const roomShow = async (id: string) => {
-  const data = ((await axios.get('/room/'+id)).data) as IMessage
+const roomShow = async (id: string, {page, size}: {page: number, size: number}) => {
+  const data = ((await axios.get(`/room/${id}?page=${page}&size=${size}`)).data) as IMessage
   return data.data
 }
 
