@@ -6,6 +6,7 @@ const routes = [
   {path: '/register', name: 'register', component: () => import('../views/login/register.vue')},
   
   {path: '/room/:id', name: 'room', component: () => import('../views/wechat/show.vue')},
+  {path: '/room/launch', name: 'room.launch', component: () => import('../views/wechat/launch.vue')},
   // {path: '/chat/:id', name: 'chat', component: () => import('../views/wechat/show.vue')},
 
   {path: '/user/:id(\\d+$)', name: 'user', component: () => import('../views/user/show.vue')},

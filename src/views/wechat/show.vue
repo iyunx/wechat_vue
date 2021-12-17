@@ -48,7 +48,7 @@ import AppAudio from '../../components/audio/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
 import { roomShow, contactUpdate, imgUpload } from '../../api/room'
-import { onMounted, reactive, ref, nextTick } from 'vue'
+import { onMounted, reactive, ref, nextTick, onBeforeUnmount } from 'vue'
 import { USER } from '../../libs/vuex';
 import moment from '../../libs/moment';
 import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
@@ -114,10 +114,24 @@ socket.on('message', data => {
         chatList.lists.push(data)
         break;
       case 2:
+      case 3:
         data.content.forEach(item => {
           chatList.lists.push({
             type: item.type,
             content: item.path,
+            room_id: data.room_id,
+            user_id: data.user_id,
+            user: data.user,
+            created_at: moment().format('YYYY-MM-DD H:i:s'),
+            updated_at: moment().format('YYYY-MM-DD H:i:s')
+          })
+        })
+        break;
+      case 4:
+        data.content.forEach(item => {
+          chatList.lists.push({
+            type: item.type,
+            content: {url: item.path, name: item.name},
             room_id: data.room_id,
             user_id: data.user_id,
             user: data.user,
@@ -181,23 +195,31 @@ const imgOpenBtn = (img: string) => {
 
 const imgCloseBtn = (newIndex: number) => imgSwiper.index = newIndex
 // 滚动条在最底部
-const setScrollTop = (dom: HTMLUListElement) => nextTick(() => dom.scrollTop = dom.scrollHeight)
+const setScrollTop = (dom: HTMLUListElement) => {
+  nextTick(() => dom && (dom.scrollTop = dom.scrollHeight))
+}
+// 更新未读信息条数，本地与数据库
+const upCount = () => {
+  const rom = roomlistArr.lists.find(item => item.id == roomId);
+  if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
+    updateContact()
+    if(rom && rom.roomset.num) {
+      !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
+      rom.roomset.num = 0
+    }
+  }
+}
 
 onMounted(() => {
-  const rom = roomlistArr.lists.find(item => item.id == roomId);
+  // roomlistArr是通过首页获取内容的，其他页面刷新丢失
   getChatLists()
     .then(() => {
       setScrollTop(chatDom.value as HTMLUListElement)
       setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
-      if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
-        updateContact()
-        if(rom && rom.roomset.num) {
-          !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
-          rom.roomset.num = 0
-        }
-      }
     })
 })
+// 退出页面前，清除未读消息
+onBeforeUnmount(() => upCount())
 
 </script>
 

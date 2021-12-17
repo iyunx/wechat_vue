@@ -2,8 +2,10 @@
   <aside class="add-overlay" v-show='modelValue' @click.stop="$emit('update:modelValue', false)">
     <ul class="add">
       <li>
-        <van-icon name="chat" />
-        <span>发起群聊</span>
+        <router-link to='/room/launch'>
+          <van-icon name="chat" />
+          <span>发起群聊</span>
+        </router-link>
       </li>
       <li>
         <router-link to='/user/search'>

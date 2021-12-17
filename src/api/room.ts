@@ -6,8 +6,10 @@ const roomIndex = async () => {
   return data.data
 }
 
-const roomStore = async (id: string) => {
-  return ((await axios.post('/room/store', id)).data) as IMessage
+const roomStore = async (arr: Array<number>) => {
+  const data = ((await axios.post('/room/store', arr)).data) as IMessage
+  console.log(data)
+  return data.data
 }
 
 const roomShow = async (id: string, {page, size}: {page: number, size: number}) => {

@@ -11,7 +11,8 @@ import {
   Popup,
   Switch,
   ImagePreview,
-  PullRefresh
+  PullRefresh,
+  CheckboxGroup, Checkbox
 } from 'vant'
 
 const vants = [
@@ -25,7 +26,8 @@ const vants = [
   Popup,
   Switch,
   ImagePreview,
-  PullRefresh
+  PullRefresh,
+  CheckboxGroup, Checkbox
 ]
 
 export default {

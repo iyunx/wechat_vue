@@ -28,13 +28,15 @@
 </template>
 
 <script lang='ts' setup>
+import { onMounted } from 'vue'
 import msgBox from '../../components/msgbox/index.vue';
 import { touchStart, touchEnd, touchMove } from './wechat';
 import { roomIndex } from '../../api/room';
 import moment from '../../libs/moment'
 import { roomlistArr, roomListSort } from '../../api/socket';
 
-roomIndex()
+setTimeout(() => {
+  roomIndex()
   .then(data => {
     // 先初始化为0 ，再叠加未读信息总数
     roomlistArr.count = 0
@@ -55,6 +57,8 @@ roomIndex()
     roomlistArr.lists = data.rooms
     roomListSort()
   })
+}, 100)
+
 </script>
 
 <style lang='less' scoped>
