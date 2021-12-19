@@ -8,7 +8,6 @@ const roomIndex = async () => {
 
 const roomStore = async (arr: Array<number>) => {
   const data = ((await axios.post('/room/store', arr)).data) as IMessage
-  console.log(data)
   return data.data
 }
 
@@ -50,7 +49,6 @@ const imgUpload = async (file: any) => {
 
 export {
   roomIndex,
-  roomStore,
   roomShow,
   roomUpdate,
   contactUpdate,

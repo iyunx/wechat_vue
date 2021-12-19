@@ -57,7 +57,7 @@ import appHeader from '../layout/header.vue'
 import { TData } from '../user/types'
 import { getUsers } from '../../api/user';
 import { useRouter } from 'vue-router';
-import { roomStore } from '../../api/room';
+import { groupStore } from '../../api/group';
 
 const search = reactive({
         value: '',
@@ -84,7 +84,7 @@ const isBlur = () => search.focus = false
 
 const checkBtn = async () => {
   if(search.checked.length <= 1) return
-  const room = await roomStore(search.checked)
+  const room = await groupStore(search.checked)
   // router.push('')
   console.log(room)
 }
