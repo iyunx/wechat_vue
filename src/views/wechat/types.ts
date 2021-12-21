@@ -22,5 +22,6 @@ interface IBase {
 }
 
 export {
-  IBase
+  IBase,
+  TLists
 }

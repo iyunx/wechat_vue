@@ -69,12 +69,17 @@ const search = reactive({
         star: [],
         reminds: []
       }),
+      userArr = ref<{id: number, name: string, avatar: string}[]>([]),
       router = useRouter()
 
 // 获取好友列表
 getUsers().then(ret => {
   if(Object.keys(ret.data.lists).length) {
     users.lists = ret.data.lists
+    const u = Object.values(ret.data.lists) as any[]
+    for(let k of u) {
+      userArr.value.push(...k)
+    }
   }
   users.star = ret.data.star
 })
@@ -84,9 +89,13 @@ const isBlur = () => search.focus = false
 
 const checkBtn = async () => {
   if(search.checked.length <= 1) return
-  const room = await groupStore(search.checked)
-  // router.push('')
-  console.log(room)
+  const u = []
+  for(let i = 0; i < search.checked.length; i++) {
+    const us = userArr.value.find(item => item.id == search.checked[i])
+    u.push({id: us.id, name: us.name, avatar: us.avatar})
+  }
+  const group = await groupStore(u)
+  router.push('/group/' + group.id)
 }
 
 </script>

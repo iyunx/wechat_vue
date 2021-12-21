@@ -8,6 +8,7 @@ const routes = [
   {path: '/room/:id', name: 'room', component: () => import('../views/wechat/show.vue')},
   {path: '/room/launch', name: 'room.launch', component: () => import('../views/wechat/launch.vue')},
   // {path: '/chat/:id', name: 'chat', component: () => import('../views/wechat/show.vue')},
+  {path: '/group/:id', name: 'group.show', component: () => import('../views/wechat/group.vue')},
 
   {path: '/user/:id(\\d+$)', name: 'user', component: () => import('../views/user/show.vue')},
   {path: '/user/search', name: 'user.search', component: () => import('../views/user/search.vue')},
