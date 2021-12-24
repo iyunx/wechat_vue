@@ -18,7 +18,8 @@ type TLists = {
 interface IBase {
   count: number
   lists: TLists[],
-  user: any
+  user?: any,
+  room?: any
 }
 
 export {

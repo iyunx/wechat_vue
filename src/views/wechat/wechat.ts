@@ -42,19 +42,17 @@ const touchStart = (e: TouchEvent) => {
     let li = findLiDom(e.touches[0].target as HTMLElement) as HTMLLIElement
     isBox.roomId = li.dataset.room_id as string
 
-    roomlistArr.lists.forEach(item => {
-      if(item.id === isBox.roomId) isBox.roomset = item.roomset
-    })
+    roomlistArr.lists.forEach(item => item.id === isBox.roomId && (isBox.roomset = item.roomset))
   }, 1000)
 }
 
-const touchEnd = (e: TouchEvent, id: string) => {
+const touchEnd = (e: TouchEvent, id: string, isGroup: boolean) => {
   // 触摸结束时间
   let endTime = moment().valueOf();
   /**阻止浏览器默认事件*/
   e.preventDefault()
   if(endTime - isBox.startTime < 1000) {
-    !isBox.isMove && router.push(`/room/${id}`)
+    !isBox.isMove && (isGroup ? router.push(`/group/${id}`) : router.push(`/room/${id}`))
     isBox.timer && clearTimeout(isBox.timer)
   }
 }

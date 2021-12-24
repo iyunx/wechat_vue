@@ -51,11 +51,18 @@ socket.on('roomlist', data => {
 })
 
 const roomListSort = () => {
-  const top: any[] = roomlistArr.lists.filter(item => item.roomset.top)
-  const down: any[] = roomlistArr.lists.filter(item => !item.roomset.top)
+  const top: any[] = roomlistArr.lists.filter(item => {
+    if(item.roomset && item.roomset.top) return item
+    if(item.group_user && item.group_user.top) return item
+  })
+  const down: any[] = roomlistArr.lists.filter(item => {
+    if(item.roomset && !item.roomset.top) return item
+    if(item.group_user && !item.group_user.top) return item
+  })
   top.sort((a, b) => Date.parse(b.chat.created_at) - Date.parse(a.chat.created_at))
   down.sort((a, b) => Date.parse(b.chat.created_at) - Date.parse(a.chat.created_at))
   roomlistArr.lists = [...top, ...down]
+  console.log(roomlistArr.lists)
 }
 
 export {

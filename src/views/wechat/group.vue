@@ -1,5 +1,5 @@
 <template>
-  <app-header :name="chatList.user.rname" icon-more>
+  <app-header :name="chatList.room.name" icon-more>
     <template #left>
       <router-link to='/'>
         <van-icon name="arrow-left" />
@@ -23,10 +23,10 @@ import AppHeader from '../layout/header.vue';
 import AppChat from '../../components/chat/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
-import { groupShow } from '../../api/group'
-import { onMounted, reactive, ref, nextTick, onBeforeUnmount } from 'vue'
+import { groupShow, groupUserUpdate } from '../../api/group'
+import { onMounted, reactive, ref, nextTick, onBeforeUnmount, computed } from 'vue'
 import moment from '../../libs/moment';
-import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
+import { roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
 import { Toast } from 'vant';
@@ -37,7 +37,7 @@ const route = useRoute(),
       chatList = reactive<IBase>({
         count: 0,
         lists: [],
-        user: {}
+        room: {}
       }),
       pager = reactive({
         page: 1,
@@ -52,15 +52,18 @@ const route = useRoute(),
 // 信息列表
 const getChatLists = async () => {
   const data = await groupShow(roomId, pager)
+  console.log(data)
   chatList.lists = data.rows
   chatList.count = data.count
-  // roomJoin(roomId)
-  if(chatList.lists.length) {
-    chatList.lists.forEach(item => {
-      if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
-    })
-  }
-  
+  chatList.room = data.group
+  chatList.room.id = data.group.group.id
+  chatList.room.name = data.group.group.name
+  Reflect.deleteProperty(chatList.room, 'group')
+  // 进入群聊
+  roomJoin(roomId)
+  data.rows.forEach(item => {
+    if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
+  })
 }
 // 下拉加载
 const onRefresh = () => {
@@ -117,9 +120,14 @@ socket.on('message', data => {
     setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
   }
 })
-// 发送实时聊天信息
+// 发送实时群聊天信息
 const chatListBtn = (msg: any, room: string, type: number) => {
-  socket.emit('message', msg, room, type)
+  // 1为群 0为私聊天
+  socket.emit('message', msg, room, type, 1)
+}
+// 实时提醒消息 推送
+const groupListBtn = (gid: string, type: number, val: string) => {
+  socket.emit('grouplist', gid, type, val)
 }
 
 const sendBtn = async (val: any, type: number) => {
@@ -128,7 +136,7 @@ const sendBtn = async (val: any, type: number) => {
       // 房间内页
       chatListBtn(val, roomId, type)
       // 房间列表页
-      roomListBtn(roomId, chatList.user.fid, type, val)
+      groupListBtn(roomId, type, val)
       break;
     case 2:
       const tp = val[Object.values(val).length - 1].type.split('/')[0]
@@ -151,7 +159,7 @@ const sendBtn = async (val: any, type: number) => {
       // 房间内页
       // chatListBtn(info, roomId, ty.id)
       // 房间列表页
-      roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
+      groupListBtn(roomId, ty.id, ty.title)
       break
     default:
       break;
@@ -178,11 +186,13 @@ onMounted(() => {
       setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
     })
 })
-
+// 未读消息设定为已读
+// const updateContact = async (num = 0) => await groupUserUpdate(roomId, {num})
 // 更新未读信息条数，本地与数据库
 const upCount = () => {
   const rom = roomlistArr.lists.find(item => item.id == roomId);
-  if((rom && rom.roomset.num) || !chatList.user.roomset.state) {
+  console.log(chatList)
+  if((rom && rom.roomset.num) || !chatList.room.state) {
     // updateContact()
     if(rom && rom.roomset.num) {
       !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
