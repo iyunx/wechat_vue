@@ -16,17 +16,12 @@ const isBox = reactive({
   x: 0,
   y: 0,
   roomId: '',
+  isGroup: false,
   roomset: {}
 })
 
 const touchStart = (e: TouchEvent) => {
   if(e.touches.length > 1) return
-
-  // if(isBox.show) {
-  //   isBox.show = false;
-  //   console.log(123)
-  //   return
-  // }
 
   isBox.isMove = false
   isBox.startTime = moment().valueOf()
@@ -42,7 +37,12 @@ const touchStart = (e: TouchEvent) => {
     let li = findLiDom(e.touches[0].target as HTMLElement) as HTMLLIElement
     isBox.roomId = li.dataset.room_id as string
 
-    roomlistArr.lists.forEach(item => item.id === isBox.roomId && (isBox.roomset = item.roomset))
+    roomlistArr.lists.forEach(item => {
+      if(item.id === isBox.roomId){
+        isBox.roomset = item.roomset
+        isBox.isGroup = item.isGroup
+      }
+    })
   }, 1000)
 }
 

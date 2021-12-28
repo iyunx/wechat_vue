@@ -62,7 +62,6 @@ const roomListSort = () => {
   top.sort((a, b) => Date.parse(b.chat.created_at) - Date.parse(a.chat.created_at))
   down.sort((a, b) => Date.parse(b.chat.created_at) - Date.parse(a.chat.created_at))
   roomlistArr.lists = [...top, ...down]
-  console.log(roomlistArr.lists)
 }
 
 export {

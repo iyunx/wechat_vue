@@ -1,8 +1,13 @@
 <template>
-  <app-header :name="chatList.room.name" icon-more>
+  <app-header :name="chatList.room.name">
     <template #left>
       <router-link to='/'>
         <van-icon name="arrow-left" />
+      </router-link>
+    </template>
+    <template v-slot:right>
+      <router-link :to='`/group/${roomId}/index`'>
+        <van-icon name="ellipsis" />
       </router-link>
     </template>
   </app-header>
@@ -24,6 +29,8 @@ import AppChat from '../../components/chat/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
 import { groupShow, groupUserUpdate } from '../../api/group'
+import { imgUpload } from '../../api/room'
+
 import { onMounted, reactive, ref, nextTick, onBeforeUnmount, computed } from 'vue'
 import moment from '../../libs/moment';
 import { roomlistArr, roomJoin } from '../../api/socket';
@@ -52,7 +59,6 @@ const route = useRoute(),
 // 信息列表
 const getChatLists = async () => {
   const data = await groupShow(roomId, pager)
-  console.log(data)
   chatList.lists = data.rows
   chatList.count = data.count
   chatList.room = data.group
@@ -74,7 +80,7 @@ const onRefresh = () => {
   pager.page += 1
   setTimeout(async () => {
     const data = await groupShow(roomId, pager)
-    chatList.lists.unshift(...data.chats.rows)
+    chatList.lists.unshift(...data.rows)
     imgSwiper.images = []
     chatList.lists.forEach((item: any) => {
       if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
@@ -153,11 +159,12 @@ const sendBtn = async (val: any, type: number) => {
       for (const file of (Object.values(val) as File[])) {
         form.append('files', file)
       }
+      // 群发送
+      form.append('isGroup', 'true')
       form.set('room_id', roomId)
-      
-      // const info = await imgUpload(form)
+      const info = await imgUpload(form)
       // 房间内页
-      // chatListBtn(info, roomId, ty.id)
+      chatListBtn(info, roomId, ty.id)
       // 房间列表页
       groupListBtn(roomId, ty.id, ty.title)
       break
@@ -187,13 +194,12 @@ onMounted(() => {
     })
 })
 // 未读消息设定为已读
-// const updateContact = async (num = 0) => await groupUserUpdate(roomId, {num})
+const updateContact = async (num = 0) => await groupUserUpdate(roomId, {num})
 // 更新未读信息条数，本地与数据库
 const upCount = () => {
   const rom = roomlistArr.lists.find(item => item.id == roomId);
-  console.log(chatList)
   if((rom && rom.roomset.num) || !chatList.room.state) {
-    // updateContact()
+    updateContact()
     if(rom && rom.roomset.num) {
       !rom.roomset.disturb && (roomlistArr.count -= rom.roomset.num)
       rom.roomset.num = 0

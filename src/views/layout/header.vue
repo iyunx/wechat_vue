@@ -59,7 +59,6 @@ const backBtn = () => router.back()
     display: block;
     text-align: center;
     line-height: 45px;
-    font-weight: 600;
   }
   section{
     position: absolute;

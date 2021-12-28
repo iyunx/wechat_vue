@@ -35,7 +35,6 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted } from 'vue'
 import msgBox from '../../components/msgbox/index.vue';
 import { touchStart, touchEnd, touchMove } from './wechat';
 import { roomIndex } from '../../api/room';
@@ -78,7 +77,7 @@ setTimeout(() => {
     roomlistArr.lists = [...data.rooms, ...data.groups]
     roomListSort()
   })
-}, 100)
+}, 300)
 
 </script>
 

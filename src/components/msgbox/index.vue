@@ -14,6 +14,7 @@ import { ref, computed } from 'vue';
 import { isBox, touchMove } from '../../views/wechat/wechat';
 import { roomlistArr, roomListSort } from '../../api/socket';
 import { contactUpdate } from '../../api/room';
+import { groupUserUpdate } from '../../api/group';
 
 const closeBtn = () => isBox.show && setTimeout(() => touchMove(), 200)
 
@@ -27,7 +28,7 @@ const isTop = computed(() => !findRoom().roomset.top)
 
 const readBtn = async () => {
   let num = isRead.value > 0 ? 0 : 1;
-  await contactUpdate(isBox.roomId, {num})
+  isBox.isGroup ? await groupUserUpdate(isBox.roomId, {num}) : await contactUpdate(isBox.roomId, {num})
   let room = findRoom()
   !room.roomset.disturb && num ? (roomlistArr.count += num) : (roomlistArr.count -= isRead.value)
   room.roomset.num = num
@@ -35,7 +36,7 @@ const readBtn = async () => {
 
 const topBtn = async () => {
   let room = findRoom()
-  await contactUpdate(isBox.roomId, {top: !room.roomset.top})
+  isBox.isGroup ? await groupUserUpdate(isBox.roomId, {top: !room.roomset.top}) : await contactUpdate(isBox.roomId, {top: !room.roomset.top})
   room.roomset.top = room.roomset.top ? false: true
   roomListSort()
 }
@@ -44,7 +45,7 @@ const stateBtn = async () => {
   let index = roomlistArr.lists.findIndex(item => item.id === isBox.roomId)
   roomlistArr.count -= roomlistArr.lists[index].roomset.num
   roomlistArr.lists.splice(index, 1)
-  await contactUpdate(isBox.roomId, {state: false})
+  isBox.isGroup ? await groupUserUpdate(isBox.roomId,  {state: false}) : await contactUpdate(isBox.roomId,  {state: false})
 }
 
 </script>
