@@ -2,7 +2,7 @@ import axios from "../libs/axios";
 import { IMessage } from "../utils";
 
 const login = async (values: any) => {
-  return ((await axios.post('/login', values)).data) as IMessage
+  return (await axios.post('/login', values)).data as IMessage
 }
 
 const register = async (values: any) => {
@@ -12,7 +12,6 @@ const register = async (values: any) => {
 const postSMS = async (values: string) => {
   return (await axios.post('/sms', {phone: values})).data as IMessage
 }
-
 
 const getUsers = async () => {
   return (await axios.get('/user')).data as IMessage;

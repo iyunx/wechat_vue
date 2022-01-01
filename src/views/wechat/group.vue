@@ -37,6 +37,7 @@ import { roomlistArr, roomJoin } from '../../api/socket';
 import { IBase } from './types';
 import socket from '../../libs/socket';
 import { Toast } from 'vant';
+import { users } from './group'
 
 const route = useRoute(),
       roomId = route.params.id as string,
@@ -207,6 +208,13 @@ const upCount = () => {
   }
 }
 // 退出页面前，清除未读消息
-onBeforeUnmount(() => upCount())
+onBeforeUnmount(() => {
+  upCount()
+  // 复原
+  users.list = []
+  users.myset = {}
+  users.base = {}
+  users.search = ''
+})
 
 </script>

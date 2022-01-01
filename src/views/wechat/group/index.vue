@@ -1,13 +1,13 @@
 <template>
-  <app-header icon-back name="聊天信息(4)"/>
+  <app-header icon-back :name="`聊天信息(${users.list.length})`" />
   <main class="init font">
     <ul class="users">
       <li v-for="user in lists" :key="user.id">
         <img :src="user.avatar" :alt="user.name">
         <span>{{user.group_user.nickname ? (user.group_user.nickname.length > 3 ? user.group_user.nickname.slice(0, 3) + '...' : user.group_user.nickname) : user.name}}</span>
       </li>
-      <li class="icon-plus"><van-icon name="plus" /></li>
-      <li v-if="users.myset.id == users.base.admin_id" class="icon-plus"><van-icon name="minus" /></li>
+      <router-link :to='`/group/${routeId}/uchange?action=add`'><li class="icon-plus"><van-icon name="plus" /></li></router-link>
+      <router-link :to='`/group/${routeId}/uchange?action=remove`'><li v-if="users.myset.id == users.base.admin_id" class="icon-plus"><van-icon name="minus" /></li></router-link>
     </ul>
     <div class="more">
       <router-link :to='`/group/${routeId}/list`'>查看更多群成员 <van-icon name="arrow" /> </router-link>
@@ -17,13 +17,15 @@
         <span>群聊名称</span>
         <span>{{ users.base.name }} <van-icon name="arrow" /></span>
       </li>
-      <li class="flex">
-        <span>群二维码</span>
-        <aside>
-          <van-icon name="qr" /> 
-          <van-icon name="arrow" />
-        </aside>
-      </li>
+      <router-link :to='`/group/${routeId}/erwei`'>
+        <li class="flex">
+          <span>群二维码</span>
+          <aside>
+            <van-icon name="qr" /> 
+            <van-icon name="arrow" />
+          </aside>
+        </li>
+      </router-link>
       <li class="flex">
         <article>
           <span>群公告</span>
@@ -89,7 +91,6 @@
 <script lang='ts' setup>
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router';
-import { guIndex } from '../../../api/group';
 import AppHeader from '../../layout/header.vue';
 import { users, getUserList } from './index';
 
@@ -98,13 +99,8 @@ const router = useRoute(),
       lists = computed(() => users.list.slice(0, 4)),
       checked = ref(false)
 
-getUserList(routeId as string).then(() => console.log(123))
+getUserList(routeId as string)
 
-onUnmounted(() => {
-  // users.base = {}
-  // users.myset = {}
-  // users.list = []
-})
 </script>
 
 <style lang='less' scoped>
@@ -168,7 +164,7 @@ onUnmounted(() => {
   background-color: @white;
   margin-top: @size;
   li{
-    &:nth-of-type(3){
+    &:nth-of-type(2){
       p{
         margin-top: .5rem;
         color: #999;

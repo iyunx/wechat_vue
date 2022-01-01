@@ -13,7 +13,7 @@
         </section>
       </div>
       <section class="box">
-        {{remind.content.name}}：你好，{{remind.content.add_name}}
+        {{remind.content.name}}: 你好，{{remind.content.add_name}}
       </section>
     </section>
     <ul class="sure-list">

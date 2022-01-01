@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from './router'
 import vant from './libs/vant'
 import axios from './libs/axios'
+import Vconsole from 'vconsole'
+// const vConsole = new Vconsole()
 
 const app = createApp(App)
 

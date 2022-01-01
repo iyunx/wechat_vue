@@ -1,5 +1,5 @@
 import { reactive, ref } from 'vue'
-import { guIndex } from '../../../api/group';
+import { groupIndex } from '../../../api/group';
 import { USER } from '../../../libs/vuex';
 const me = USER.value
 
@@ -19,14 +19,17 @@ const users = reactive<TUser>({
 const old = ref<any[]>([])
 
 const getUserList = async (id: string) => {
-  const ret = await guIndex(id)
+  const ret = await groupIndex(id)
   users.base = {
     id: ret.data.id,
     name: ret.data.name,
+    avatar: ret.data.img,
+    allow: ret.data.allow,
     notice: ret.data.notice,
     qrcode: ret.data.qrcode,
     admin_id: ret.data.user_id,
     admin_ids: ret.data.admin_ids,
+    user_ids: ret.data.user_ids
   }
   users.list = ret.data.users
   old.value = ret.data.users

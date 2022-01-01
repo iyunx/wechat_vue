@@ -33,6 +33,7 @@ const roomListBtn = (roomId: string, user: any, type = 1, msg = '') => {
   socket.emit('roomlist', roomId, user, type, msg)
 }
 socket.on('roomlist', data => {
+  console.log(data)
   /**
    * 注意，直接进入聊天室，roomlistArr.lists不含此聊天室，为空，
    * 只有通过首页进入此聊天室，聊天室才能通过room_id找到
@@ -64,6 +65,11 @@ const roomListSort = () => {
   roomlistArr.lists = [...top, ...down]
 }
 
+// 创建群聊 通知群员
+const groupListBtn = (groupId: string, type = 1, msg = '') => {
+  socket.emit('grouplist', groupId, type, msg)
+}
+
 export {
   roomJoin,
   remindArr,
@@ -71,4 +77,5 @@ export {
   roomlistArr,
   roomListBtn,
   roomListSort,
+  groupListBtn,
 }

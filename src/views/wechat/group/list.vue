@@ -1,5 +1,5 @@
 <template>
-  <app-header icon-back name="聊天信息(4)"/>
+  <app-header icon-back  :name="`聊天信息(${users.list.length})`" />
   <main class="init">
   <van-field v-model="users.search" left-icon="search" @keyup="searchEnter" />
     <ul class="users" v-if='users'>

@@ -3,7 +3,7 @@ import { Toast } from 'vant';
 import { TOKEN, USER } from './vuex';
 import router from '../router'
 
-axios.defaults.baseURL = 'http://localhost:8000/';
+axios.defaults.baseURL = 'http://192.168.2.3:8000/';
 axios.defaults.timeout = 2500;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
@@ -22,7 +22,7 @@ axios.interceptors.request.use(
 // 响应拦截器
 axios.interceptors.response.use(
   response => {
-    if(response.headers['authorization']) {
+    if(response.headers && response.headers['authorization']) {
       TOKEN.value = response.headers['authorization']
     }
     return response;
