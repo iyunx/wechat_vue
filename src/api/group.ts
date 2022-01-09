@@ -31,12 +31,17 @@ const groupUserUpdate = async (id: string, {num, top, state}: {num?: number, top
     else str = str + `&state=${state}`
   }
   str[str.length - 1] == '?' && (str = '')
-  return ((await axios.put(`/group/${id}${str}`)).data) as IMessage
+  return ((await axios.put(`/group/${id}/num${str}`)).data) as IMessage
+}
+
+const groupJoin = async (id: string, ids: {id: number, name: string, avatar: string}[], action: string = 'add') => {
+  return (await axios.put(`/group/${id}/join?action=${action}`, {ids})).data as IMessage
 }
 
 export {
+  groupIndex,
   groupStore,
   groupShow,
   groupUserUpdate,
-  groupIndex
+  groupJoin
 }

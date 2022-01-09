@@ -27,7 +27,7 @@ const getUserList = async (id: string) => {
     allow: ret.data.allow,
     notice: ret.data.notice,
     qrcode: ret.data.qrcode,
-    admin_id: ret.data.user_id,
+    user_id: ret.data.user_id,
     admin_ids: ret.data.admin_ids,
     user_ids: ret.data.user_ids
   }

@@ -76,7 +76,7 @@ setTimeout(() => {
     })
     roomlistArr.lists = [...data.rooms, ...data.groups]
     roomListSort()
-  })
+  }).then(() => console.log(roomlistArr))
 }, 300)
 
 </script>

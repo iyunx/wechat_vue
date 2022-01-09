@@ -1,5 +1,11 @@
 <template>
-  <app-header icon-back :name="`聊天信息(${users.list.length})`" />
+  <app-header :name="`聊天信息(${users.list.length})`">
+    <template #left>
+      <router-link :to="`/group/${routeId}`">
+        <van-icon name="arrow-left" />
+      </router-link>
+    </template>
+  </app-header>
   <main class="init font">
     <ul class="users">
       <li v-for="user in lists" :key="user.id">
@@ -7,7 +13,7 @@
         <span>{{user.group_user.nickname ? (user.group_user.nickname.length > 3 ? user.group_user.nickname.slice(0, 3) + '...' : user.group_user.nickname) : user.name}}</span>
       </li>
       <router-link :to='`/group/${routeId}/uchange?action=add`'><li class="icon-plus"><van-icon name="plus" /></li></router-link>
-      <router-link :to='`/group/${routeId}/uchange?action=remove`'><li v-if="users.myset.id == users.base.admin_id" class="icon-plus"><van-icon name="minus" /></li></router-link>
+      <router-link :to='`/group/${routeId}/uchange?action=remove`' v-if="users.myset.id == users.base.user_id"><li class="icon-plus"><van-icon name="minus" /></li></router-link>
     </ul>
     <div class="more">
       <router-link :to='`/group/${routeId}/list`'>查看更多群成员 <van-icon name="arrow" /> </router-link>
@@ -33,7 +39,7 @@
         </article>
         <van-icon name="arrow" />
       </li>
-      <li class="flex" v-if="users.myset.id == users.base.admin_id">
+      <li class="flex" v-if="users.myset.id == users.base.user_id">
         <span>群管理</span>
         <van-icon name="arrow" />
       </li>

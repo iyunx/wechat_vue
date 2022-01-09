@@ -66,6 +66,7 @@ const getChatLists = async () => {
   chatList.room.id = data.group.group.id
   chatList.room.name = data.group.group.name
   Reflect.deleteProperty(chatList.room, 'group')
+  console.log(chatList)
   // 进入群聊
   roomJoin(roomId)
   data.rows.forEach(item => {
@@ -188,11 +189,13 @@ const swiperBtn = (val: boolean) => imgSwiper.show = val
 
 onMounted(() => {
   // roomlistArr是通过首页获取内容的，其他页面刷新丢失
-  getChatLists()
+  setTimeout(() => {
+    getChatLists()
     .then(() => {
       setScrollTop(chatDom.value as HTMLUListElement)
       setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
     })
+  }, 150)
 })
 // 未读消息设定为已读
 const updateContact = async (num = 0) => await groupUserUpdate(roomId, {num})

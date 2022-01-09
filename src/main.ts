@@ -4,7 +4,7 @@ import router from './router'
 import vant from './libs/vant'
 import axios from './libs/axios'
 import Vconsole from 'vconsole'
-// const vConsole = new Vconsole()
+// new Vconsole()
 
 const app = createApp(App)
 

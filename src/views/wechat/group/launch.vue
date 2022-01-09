@@ -2,8 +2,8 @@
 <template>
   <app-header icon-back :name=" action ? ( action == 'add' ? '选择联系人' : `聊天成员(${users.star.length})`) : '发起群聊'"></app-header>
   <div class="init">
-    <van-field v-model="search.value" @input="searchBtn" @focus="isFocus" @blur="isBlur" left-icon='search' placeholder="请输入用户名" />
-    <article class="lists" v-if="!search.focus">
+    <van-field v-model="search.value" @input="searchBtn" left-icon='search' placeholder="请输入用户名" />
+    <article class="lists">
       <section class="fun" v-if="!routeId">
         <router-link class="link" to=''>选择一个群</router-link>
         <router-link class="link" to=''>面对面建群</router-link>
@@ -23,48 +23,48 @@
             </li>
           </ul>
         </template>
-        <template v-if="users.lists">
-          <template v-for="(user, k) in users.lists">
-            <aside class="aside">{{k}}</aside>
-            <ul class="company list">
-              <li v-for="item in user">
-                <van-checkbox :name="item.id" :disabled='search.addCheck.includes(item.id)'>
-                  <div class="checkbox">
-                    <aside><img :src="item.avatar"></aside>
-                    <span>{{item.Contact.rname || item.name}}</span>
-                  </div>
-                </van-checkbox>
-              </li>
-            </ul>
-          </template>
+        <template v-if="Object.keys(users.lists).length" v-for="(user, k) in users.lists">
+          <aside class="aside">{{k}}</aside>
+          <ul class="company list">
+            <li v-for="item in user">
+              <van-checkbox :name="item.id" :disabled='search.addCheck.includes(item.id)'>
+                <div class="checkbox">
+                  <aside><img :src="item.avatar"></aside>
+                  <span>{{item.Contact.rname || item.name}}</span>
+                </div>
+              </van-checkbox>
+            </li>
+          </ul>
         </template>
       </van-checkbox-group>
     </article>
-    <article v-else>
-
-    </article>
   </div>
   <div class="checkBtn">
-    <van-button :color="search.checked.length >= 1 ? 'green' : ''" size="small" :disabled='!((search.checked.length - search.addCheck.length)>=1)' @click="checkBtn">
-      <span v-if="!routeId">完成{{search.checked.length ? ` (${search.checked.length})` : ''}}</span>
-      <span v-else>完成{{search.checked.length - search.addCheck.length ? ` (${search.checked.length - search.addCheck.length})` : ''}}</span>
+    <van-button 
+      :color="search.checked.length - search.addCheck.length >= 1 ? 'green' : ''" size="small"
+      :disabled='!((search.checked.length - search.addCheck.length) >= 1)'
+      @click="checkBtn">
+      <!-- 群员 增 删 -->
+      <span v-if="routeId">完成{{search.checked.length - search.addCheck.length ? ` (${search.checked.length - search.addCheck.length})` : ''}}</span>
+      <span v-else>完成{{search.checked.length ? ` (${search.checked.length})` : ''}}</span>
     </van-button>
   </div>
 </template>
 
 <script lang='ts' setup>
-import { reactive, ref, watchEffect } from 'vue'
+import { reactive } from 'vue'
 import appHeader from '../../layout/header.vue'
 import { TData } from '../../user/types'
-import { getUser, getUsers } from '../../../api/user';
+import { getUsers } from '../../../api/user';
 import { useRouter, useRoute } from 'vue-router';
-import { groupStore, groupUserUpdate } from '../../../api/group';
-import { groupListBtn } from '../../../api/socket';
+import { groupStore, groupJoin } from '../../../api/group';
+import { groupListBtn, removeUser } from '../../../api/socket';
 import { users as userList } from './index'
+import { Toast } from 'vant';
+import { roomlistArr } from '../../../api/socket';
 
 const search = reactive({
         value: '',
-        focus: false,
         checked: [],
         addCheck: []
       }),
@@ -73,41 +73,45 @@ const search = reactive({
         star: [],
         reminds: []
       }),
-      oriUsers = reactive<TData>({
+      // 好友原始数据 star星标好友，lists为按首字母分类的{}好友群组，all为全部好友或群友的数组
+      userArr = reactive({
         lists: {},
         star: [],
-        reminds: []
+        all: [],
       }),
-      userArr = ref<{id: number, name: string, avatar: string}[]>([]),
       router = useRouter(),
       route = useRoute(),
-      routeId = route.params.id,
-      action = route.query.action
+      routeId = route.params.id as string,
+      action = route.query.action as string
 
 // 获取好友列表
 const getUserList = () => {
   if(action == 'remove') {
-    const us = JSON.parse(JSON.stringify(userList.list))
-    us.forEach(item => {
+    let us = JSON.parse(JSON.stringify(userList.list)) as any[]
+    us = us.filter(item => {
       item.Contact = {
-        rname: item.group_user.nickname
+        rname: item.group_user.nickname || ''
       }
       delete item.group_user
+      return item.id != userList.base.user_id
     })
     users.star = us
-    oriUsers.star = us
+    userArr.all = us
   } else {
     getUsers().then(ret => {
       if(!Object.keys(ret.data.lists).length) return;
-      users.lists = ret.data.lists
       const u = Object.values(ret.data.lists) as any[]
-      for(let k of u) {
-        userArr.value.push(...k)
+      // 所有好友 [{id: '', name: ''}]
+      for(let v of u) {
+        userArr.all.push(...v)
       }
+      // 所有好友首字母分组 {a: [{id: '', name: '', ...}], b: [...]}
+      userArr.lists = ret.data.lists
+      userArr.star = ret.data.star
+      
+      users.lists = ret.data.lists
       users.star = ret.data.star
       
-      oriUsers.lists = ret.data.lists
-      oriUsers.star = ret.data.star
       // 群，增群员
       action == 'add' && userList.list.forEach(item => search.checked.push(item.id) && search.addCheck.push(item.id))
     })
@@ -115,44 +119,76 @@ const getUserList = () => {
 }
 getUserList()
 
-const isFocus = () => !routeId && (search.focus = true)
-const isBlur = () => !routeId && (search.focus = false)
-
 const searchBtn = () => {
-  if(routeId) {
+  if(action == 'remove'){
+    search.value.length
+    ? users.star = userArr.all.filter(item => item.name.includes(search.value) || item.Contact.rname.includes(search.value))
+    : users.star = userArr.all
+  } else {
     if(search.value.length){
-      users.star = oriUsers.star.filter(item => item.name.includes(search.value));
-      const u = Object.entries(oriUsers.lists)
+      users.star = userArr.star.filter(item => item.Contact.star && (item.name.includes(search.value) || item.Contact.rname.includes(search.value)));
+      const u = Object.entries(userArr.lists) as any[]
       users.lists = {}
       for(let [k, v] of u) {
         const vm = v.filter(item => item.name.includes(search.value) || item.Contact.rname.includes(search.value))
         vm.length && (users.lists[k] = vm)
       }
     } else {
-      users.lists = oriUsers.lists
-      users.star = oriUsers.star
+      users.lists = userArr.lists
+      users.star = userArr.star
     }
-  } else {
-    console.log(333)
   }
-  
 }
 
 const checkBtn = async () => {
-  if(search.checked.length <= 1) return
-  const u = []
-  for(let i = 0; i < search.checked.length; i++) {
-    const us = userArr.value.find(item => item.id == search.checked[i])
-    u.push({id: us.id, name: us.name, avatar: us.avatar})
-  }
-  if(routeId && action){
-    // 加入或邀请入群聊
-    // const group = await groupUserUpdate(routeId as string, {})
+  if(routeId){
+    // 移除群友，或群
+    if(action == 'remove'){
+      if(userList.base.user_id != userList.myset.id) return Toast('你不是管理员')
+      if(users.star.length - search.checked.length < 2) return Toast('一个群至少3人')
+      const del: Array<{id: number, name: string, avatar: string}> = []
+      search.checked.forEach(id => {
+        users.star.forEach(item => {
+          if(item.id == id) {
+            const ret = userArr.all.find(item => item.id == id)
+            del.push({id, avatar: ret.avatar, name: ret.name })
+          }
+        })
+        users.star = users.star.filter(item => item.id != id)
+      })
+      const data = await groupJoin(routeId, del, action)
+      if(data.code == 200){
+        removeUser(routeId, del, false)
+        router.push(`/group/${data.data.id}`)
+      }
+    } else {
+      // 邀请好友入群
+      const addId = []
+      search.checked.forEach(id => {
+        if(!search.addCheck.includes(id)){
+          const ret = userArr.all.find(item => item.id == id)
+          addId.push({id, avatar: ret.avatar, name: ret.name })
+        }
+      })
+      const data = await groupJoin(routeId, addId)
+      if(data.code == 200){
+        // 通知入群的人，加入群聊，对方微信首页，新增一个群聊房间
+        // 房间的id，房间的头像，房间的名称
+        groupListBtn(routeId, 0, addId)
+        router.replace(`/group/${data.data.id}`)
+      }
+    }
   } else {
     // 创建群聊
+    if(search.checked.length <= 1) return Toast('群员必须2人以上')
+    const u = []
+    for(let i = 0; i < search.checked.length; i++) {
+      const us = userArr.all.find(item => item.id == search.checked[i])
+      u.push({id: us.id, name: us.name, avatar: us.avatar})
+    }
     const group = await groupStore(u)
     router.push('/group/' + group.id)
-    groupListBtn(group.id, 0)
+    groupListBtn(group.id, 0, u)
   }
 }
 

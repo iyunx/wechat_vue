@@ -33,7 +33,6 @@ const roomListBtn = (roomId: string, user: any, type = 1, msg = '') => {
   socket.emit('roomlist', roomId, user, type, msg)
 }
 socket.on('roomlist', data => {
-  console.log(data)
   /**
    * 注意，直接进入聊天室，roomlistArr.lists不含此聊天室，为空，
    * 只有通过首页进入此聊天室，聊天室才能通过room_id找到
@@ -65,10 +64,22 @@ const roomListSort = () => {
   roomlistArr.lists = [...top, ...down]
 }
 
-// 创建群聊 通知群员
-const groupListBtn = (groupId: string, type = 1, msg = '') => {
+// 创建群聊 通知群员 bool = true 创建，false 邀请入群的人
+const groupListBtn = (groupId: string, type = 1, msg = []) => {
   socket.emit('grouplist', groupId, type, msg)
 }
+// 移除群员，或移除好友
+// type ? 移除好友 : 移除群员
+const removeUser = (romId: string, uid: number | Array<{id: number, name: string, avatar: string}>, type = true) => {
+  socket.emit('removeUser', romId, uid, type)
+}
+socket.on('removeUser', (romId: string, type: boolean) => {
+  const index = roomlistArr.lists.findIndex(item => item.id == romId)
+  const room = roomlistArr.lists.find(item => item.id == romId)
+  roomlistArr.count -= room.roomset.num;
+  roomlistArr.lists.splice(index, 1)
+})
+// 邀请入群，通知管理员通过审核
 
 export {
   roomJoin,
@@ -78,4 +89,5 @@ export {
   roomListBtn,
   roomListSort,
   groupListBtn,
+  removeUser
 }
