@@ -9,7 +9,6 @@ export const trimStr = (str: string) => {
   return str.replace(/&nbsp;/ig, '')
 }
 
-
 // 防抖
 export const debounce = (fn: Function, daley: number = 600) => {
   let timer: any = null;
@@ -19,6 +18,11 @@ export const debounce = (fn: Function, daley: number = 600) => {
       fn()
     }, daley)
   }
+}
+
+// 百分比计算
+export const GetPercent = (num: number, total: number) => {
+  return total <= 0 ? 0 : Math.floor(Math.round(num / total * 10000) / 100);
 }
 
 export interface IMessage {

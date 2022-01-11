@@ -58,12 +58,20 @@
       </div>
     </transition>
   </div>
+  <button
+    style="position: absolute; z-index: 101; bottom: 0;"
+    @touchstart="audioShow = true"
+    @touchmove="audioMove"
+    @touchend="audioEnd"
+  >123123123</button>
+  <app-audio v-model="audioShow" :audioXY="audioXY" @getAudio="getAudio"></app-audio>
 </template>
 
 <script lang='ts' setup>
-import { onBeforeUnmount, ref, watch, nextTick } from 'vue'
+import { onBeforeUnmount, ref, watch, nextTick, reactive, onMounted } from 'vue'
 import emoInco from '../../../components/emoji/index.vue'
 import editInput from '../../../components/editInput/index.vue'
+import appAudio from '../../../components/audio/media.vue'
 import { state, isAudioBtn, chatBtn, moreBtn } from './radioOrInput'
 import { editInputValue, editInputChange, emoChange } from './editInputFn'
 import { getStyle } from '../../../utils'
@@ -72,9 +80,14 @@ const props = defineProps({
   dom: HTMLUListElement
 })
 const emits = defineEmits(['sendBtn'])
-// 发送的信息类型 0系统，1文字 2图片 3路由。。。
+// 0系统信息，1文字，2本地上传(图，音乐，食品，文件等)，3实时录音
 const footerDom = ref(),
-      value = ref();
+      value = ref(),
+      audioShow = ref(false),
+      audioXY = reactive({
+        pageX: 0,
+        pageY: 0
+      })
 
 const footerHeight = () => nextTick(() => {
   if(props.dom){
@@ -113,15 +126,22 @@ onBeforeUnmount(() => {
   state.faceShow = false;
   state.moreShow = false;
 })
+
+onMounted(() => {
+})
+
+// audio 实时录音 3
+const audioMove = (e: TouchEvent) => {
+  audioXY.pageX = e.touches[0].pageX
+  audioXY.pageY = e.touches[0].pageY
+}
+const audioEnd = () => audioShow.value = false
+const getAudio = (blob: Blob) => blob.size && emits('sendBtn', blob, 3)
+
+// video 实时录像 4
 </script>
 
 <style lang='less' scoped>
-// .footer{
-//   position: absolute;
-//   inset: 0;
-//   // background-color: red;
-//   // z-index: 100;
-// }
 .chat-footer{
   position: fixed;
   bottom: 0;

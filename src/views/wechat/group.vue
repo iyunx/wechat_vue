@@ -29,7 +29,7 @@ import AppChat from '../../components/chat/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
 import { groupShow, groupUserUpdate } from '../../api/group'
-import { imgUpload } from '../../api/room'
+import { imgUpload, audioUp } from '../../api/room'
 
 import { onMounted, reactive, ref, nextTick, onBeforeUnmount, computed } from 'vue'
 import moment from '../../libs/moment';
@@ -137,7 +137,7 @@ const chatListBtn = (msg: any, room: string, type: number) => {
 const groupListBtn = (gid: string, type: number, val: string) => {
   socket.emit('grouplist', gid, type, val)
 }
-
+// 0系统信息，1文字，2本地(图，音乐，食品，文件等)，3实时录音
 const sendBtn = async (val: any, type: number) => {
   switch (type) {
     case 1:
@@ -169,7 +169,15 @@ const sendBtn = async (val: any, type: number) => {
       chatListBtn(info, roomId, ty.id)
       // 房间列表页
       groupListBtn(roomId, ty.id, ty.title)
-      break
+      break;
+    case 3:
+      const audioForm = new FormData()
+      audioForm.append('files', val)
+      audioForm.set('room_id', roomId)
+      audioForm.append('isGroup', 'true')
+      const audio = await audioUp(audioForm)
+      console.log(audio)
+      break;
     default:
       break;
   }

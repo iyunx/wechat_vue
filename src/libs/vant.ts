@@ -12,7 +12,8 @@ import {
   Switch,
   ImagePreview,
   PullRefresh,
-  CheckboxGroup, Checkbox
+  CheckboxGroup, Checkbox,
+  Overlay
 } from 'vant'
 
 const vants = [
@@ -27,7 +28,8 @@ const vants = [
   Switch,
   ImagePreview,
   PullRefresh,
-  CheckboxGroup, Checkbox
+  CheckboxGroup, Checkbox,
+  Overlay
 ]
 
 export default {

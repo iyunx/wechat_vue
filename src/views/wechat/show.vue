@@ -150,7 +150,10 @@ const sendBtn = async (val: any, type: number) => {
       chatListBtn(info, roomId, ty.id)
       // 房间列表页
       roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
-      break
+      break;
+    case 3:
+    console.log(val)
+      break;
     default:
       break;
   }

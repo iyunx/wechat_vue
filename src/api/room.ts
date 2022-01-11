@@ -42,8 +42,13 @@ const roomDestroy = async (id: string) => {
   // return ((await axios.post('/login', values)).data) as IMessage
 }
 
-const imgUpload = async (file: any) => {
+const imgUpload = async (file: FormData) => {
   const data = ((await axios.post('/room/upload', file)).data) as IMessage
+  return data.data
+}
+
+const audioUp = async (file: FormData) => {
+  const data = ((await axios.post('/group/audio', file)).data) as IMessage
   return data.data
 }
 
@@ -52,5 +57,6 @@ export {
   roomShow,
   roomUpdate,
   contactUpdate,
-  imgUpload
+  imgUpload,
+  audioUp
 }
