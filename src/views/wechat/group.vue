@@ -60,7 +60,6 @@ const route = useRoute(),
 // 信息列表
 const getChatLists = async () => {
   const data = await groupShow(roomId, pager)
-  chatList.lists = data.rows
   chatList.count = data.count
   chatList.room = data.group
   chatList.room.id = data.group.group.id
@@ -69,9 +68,15 @@ const getChatLists = async () => {
   console.log(chatList)
   // 进入群聊
   roomJoin(roomId)
+  
   data.rows.forEach(item => {
     if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
   })
+  chatList.lists = data.rows
+}
+
+const audioCanPaly = (e) => {
+  console.log(e)
 }
 // 下拉加载
 const onRefresh = () => {
@@ -177,6 +182,12 @@ const sendBtn = async (val: any, type: number) => {
       audioForm.append('isGroup', 'true')
       const audio = await audioUp(audioForm)
       console.log(audio)
+      let title = '[语音]'
+      audio.type == 5 && (title = '[视频]')
+      // 房间内页
+      chatListBtn(audio, roomId, audio.type)
+      // 房间列表页
+      groupListBtn(roomId, audio.type, title)
       break;
     default:
       break;

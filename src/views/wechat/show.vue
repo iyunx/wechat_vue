@@ -23,7 +23,7 @@ import AppHeader from '../layout/header.vue';
 import AppChat from '../../components/chat/index.vue'
 import AppFooter from './footer/index.vue';
 import { useRoute } from 'vue-router';
-import { roomShow, contactUpdate, imgUpload } from '../../api/room'
+import { roomShow, contactUpdate, imgUpload, audioUp } from '../../api/room'
 import { onMounted, reactive, ref, nextTick, onBeforeUnmount } from 'vue'
 import moment from '../../libs/moment';
 import { roomListBtn, roomlistArr, roomJoin } from '../../api/socket';
@@ -152,7 +152,16 @@ const sendBtn = async (val: any, type: number) => {
       roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
       break;
     case 3:
-    console.log(val)
+      const audioForm = new FormData()
+      audioForm.append('files', val)
+      audioForm.set('room_id', roomId)
+      const audio = await audioUp(audioForm)
+      let title = '[语音]'
+      audio.type == 5 && (title = '[视频]')
+      // 房间内页
+      chatListBtn(audio, roomId, audio.type)
+      // 房间列表页
+      roomListBtn(roomId, chatList.user.fid, audio.type, title)
       break;
     default:
       break;

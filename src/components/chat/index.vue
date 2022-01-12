@@ -22,6 +22,14 @@
                 </div>
                 <img :src="fileUrl" />
               </a>
+              <div v-if="item.type === 5">
+                <article class="audio-btn" v-if="item.user_id === me.id">
+                  5“ <van-icon name="volume-o" style="transform: rotate(180deg);" />
+                </article>
+                <article class="audio-btn" v-else>
+                  <van-icon name="volume-o" /> 5“
+                </article>
+              </div>
             </div>
           </section>
         </li>
@@ -31,6 +39,7 @@
   
   <van-image-preview v-model:show="swiper.show" :start-position='index' :images="swiper.images" @change="imgCloseBtn">
   </van-image-preview>
+
 </template>
 
 <script lang='ts' setup>
@@ -161,6 +170,13 @@ onMounted(() => {
             height: 2.6rem;
           }
         }
+        .audio-btn{
+          display: inline-block;
+          background-color: white;
+          border-radius: 5px;
+          padding: 10px;
+          margin-top: 2px;
+        }
       }
       article{
         display: inline-block;
@@ -192,6 +208,10 @@ onMounted(() => {
           }
         }
         article{
+          float: right;
+          background-color: #9eea6a;
+        }
+        .audio-btn{
           float: right;
           background-color: #9eea6a;
         }

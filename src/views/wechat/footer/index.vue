@@ -60,7 +60,7 @@
   </div>
   <button
     style="position: absolute; z-index: 101; bottom: 0;"
-    @touchstart="audioShow = true"
+    @touchstart="audioStart"
     @touchmove="audioMove"
     @touchend="audioEnd"
   >123123123</button>
@@ -99,7 +99,6 @@ const footerHeight = () => nextTick(() => {
 watch(() => state.faceShow, () => footerHeight())
 watch(() => state.moreShow, () => footerHeight())
 
-
 const sendBtn = () => {
   const val = editInputValue.input.trim()
   if(val.length) emits('sendBtn', val, 1)
@@ -131,6 +130,10 @@ onMounted(() => {
 })
 
 // audio 实时录音 3
+const audioStart = (e: TouchEvent) => {
+  e.preventDefault()
+  audioShow.value = true
+}
 const audioMove = (e: TouchEvent) => {
   audioXY.pageX = e.touches[0].pageX
   audioXY.pageY = e.touches[0].pageY

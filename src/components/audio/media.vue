@@ -20,6 +20,7 @@
       <div class="track-red" v-track-directive="null" v-show="show.close"></div>
       <div class="track-green" v-track-directive="null" v-show="show.send"></div>
     </section>
+    <audio ref="audioRef"></audio>
   </van-overlay>
 </template>
 
@@ -61,7 +62,8 @@ import vTrackDirective from './directives/track'
         recorder = ref<MediaRecorder>(),
         blobs = ref<Blob>(),
         chunks = ref([]),
-        body = {x: document.body.offsetWidth, y: document.body.offsetHeight}
+        body = {x: document.body.offsetWidth, y: document.body.offsetHeight},
+        audioRef = ref<HTMLAudioElement>()
 
   watch(() => props.modelValue, (newBool, oldBool) => {
     newBool && init()
@@ -92,14 +94,17 @@ import vTrackDirective from './directives/track'
     }
   }, {deep: true})
 
+  
+
   const init = () => {
-    navigator.mediaDevices.getUserMedia({audio: props.modelValue})
+    navigator.mediaDevices.getUserMedia({audio: true})
     .then(stream => {
       recorder.value = new MediaRecorder(stream)
       recorder.value.start()
       recorder.value.ondataavailable = e => chunks.value.push(e.data)
     })
     .catch(err => console.log(err))
+    
   }
 
   const audioInfo = () => {
