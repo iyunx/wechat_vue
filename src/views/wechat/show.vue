@@ -79,96 +79,89 @@ const onRefresh = () => {
 
 // 接受实时聊天信息
 socket.on('message', data => {
-  if(data.room_id == roomId){
-    switch(data.type){
-      case 1:
-        chatList.lists.push(data)
-        break;
-      case 2:
-      case 3:
-        data.content.forEach(item => {
-          chatList.lists.push({
-            type: item.type,
-            content: item.path,
-            room_id: data.room_id,
-            user_id: data.user_id,
-            user: data.user,
-            created_at: moment().format('YYYY-MM-DD H:i:s'),
-            updated_at: moment().format('YYYY-MM-DD H:i:s')
-          })
-        })
-        break;
-      case 4:
-        data.content.forEach(item => {
-          chatList.lists.push({
-            type: item.type,
-            content: {url: item.path, name: item.name},
-            room_id: data.room_id,
-            user_id: data.user_id,
-            user: data.user,
-            created_at: moment().format('YYYY-MM-DD H:i:s'),
-            updated_at: moment().format('YYYY-MM-DD H:i:s')
-          })
-        })
-        break;
-    }
-    setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
+  if(data.room_id != roomId && !data.isGroup) return
+  
+  if(data.type == 1 || data.type == 3 || data.type == 5) chatList.lists.push(data)
+  if(data.type == 2){
+    data.content.forEach(item => {
+      chatList.lists.push({
+        type: item.type,
+        content: item.path,
+        room_id: data.room_id,
+        user_id: data.user_id,
+        user: data.user,
+        created_at: moment().format('YYYY-MM-DD H:i:s'),
+        updated_at: moment().format('YYYY-MM-DD H:i:s')
+      })
+    })
   }
+  if(data.type == 4){
+    data.content.forEach(item => {
+      chatList.lists.push({
+        type: item.type,
+        content: {url: item.path, name: item.name},
+        room_id: data.room_id,
+        user_id: data.user_id,
+        user: data.user,
+        created_at: moment().format('YYYY-MM-DD H:i:s'),
+        updated_at: moment().format('YYYY-MM-DD H:i:s')
+      })
+    })
+  }
+  setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
 })
 // 发送实时聊天信息
 const chatListBtn = (msg: any, room: string, type: number) => {
   socket.emit('message', msg, room, type)
 }
-
+// 0系统信息，1文字，2本地(图，音乐，食品，文件等)，3实时录音
 const sendBtn = async (val: any, type: number) => {
-  switch (type) {
-    case 1:
-      // 房间内页
-      chatListBtn(val, roomId, type)
-      // 房间列表页
-      roomListBtn(roomId, chatList.user.fid, type, val)
-      break;
-    case 2:
-      const tp = val[Object.values(val).length - 1].type.split('/')[0]
-      const typelist = [
-        {id: 2, type: 'image', title: '[图片]'},
-        {id: 3, type: 'video', title: '[视频]'}
-      ]
-      const ty = typelist.find(item => item.type == tp) || {id: 4, title: '[文件]'};
-      const arr: any[] = [];
-      (Object.values(val) as File[]).forEach(item => {
-        arr.push({type: item.type, name: item.name, file: item})
-      })
-      const form = new FormData()
-      for (const file of (Object.values(val) as File[])) {
-        form.append('files', file)
-      }
-      form.set('room_id', roomId)
-      
-      const info = await imgUpload(form)
-      // 房间内页
+  if(type == 1){
+    chatListBtn(val, roomId, type) // 房间内页
+    roomListBtn(roomId, type, val) // 房间列表页
+  }
+
+  if(type == 2){
+    const tp = val[Object.values(val).length - 1].type.split('/')[0]
+    const typelist = [
+      {id: 2, type: 'image', title: '[图片]'},
+      {id: 3, type: 'video', title: '[视频]'}
+    ]
+    const ty = typelist.find(item => item.type == tp) || {id: 4, title: '[文件]'};
+    const arr: any[] = [];
+    (Object.values(val) as File[]).forEach(item => {
+      arr.push({type: item.type, name: item.name, file: item})
+    })
+    const form = new FormData()
+    for (const file of (Object.values(val) as File[])) {
+      form.append('files', file)
+    }
+    // 群发送
+    form.append('isGroup', 'true')
+    form.set('room_id', roomId)
+    const info = await imgUpload(form)
+    // 房间内页
       chatListBtn(info, roomId, ty.id)
       // 房间列表页
       roomListBtn(roomId, chatList.user.fid, ty.id, ty.title)
-      break;
-    case 3:
-      const audioForm = new FormData()
-      audioForm.append('files', val)
-      audioForm.set('room_id', roomId)
-      const audio = await audioUp(audioForm)
-      let title = '[语音]'
-      audio.type == 5 && (title = '[视频]')
-      // 房间内页
+  }
+  
+  if (type == 3) {
+    const audioForm = new FormData()
+    audioForm.append('files', val)
+    audioForm.set('room_id', roomId)
+    audioForm.append('isGroup', 'true')
+    const audio = await audioUp(audioForm)
+    let title = '[语音]'
+    audio.type == 5 && (title = '[视频]')
+    // 房间内页
       chatListBtn(audio, roomId, audio.type)
       // 房间列表页
       roomListBtn(roomId, chatList.user.fid, audio.type, title)
-      break;
-    default:
-      break;
   }
 }
-// 未读消息设定为已读
-const updateContact = async (num = 0) => await contactUpdate(roomId, {num})
+
+
 // 接收dom
 const getChatDom = (val: HTMLUListElement) => {
   chatDom.value = val
@@ -189,6 +182,8 @@ onMounted(() => {
     })
 })
 
+// 未读消息设定为已读
+const updateContact = async (num = 0) => await contactUpdate(roomId, {num})
 // 更新未读信息条数，本地与数据库
 const upCount = () => {
   const rom = roomlistArr.lists.find(item => item.id == roomId);

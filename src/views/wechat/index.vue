@@ -58,6 +58,9 @@ setTimeout(() => {
         case 4:
           room.chat.msg = '[文件]';
           break;
+        case 5:
+          room.chat.msg = '[语音]';
+          break;
       }
     })
     data.groups.forEach((room: any) => {
@@ -72,12 +75,15 @@ setTimeout(() => {
         case 4:
           room.chat.msg = '[文件]';
           break;
+        case 5:
+          room.chat.msg = '[语音]';
+          break;
       }
     })
     roomlistArr.lists = [...data.rooms, ...data.groups]
     roomListSort()
   }).then(() => console.log(roomlistArr))
-}, 300)
+}, 400)
 
 </script>
 

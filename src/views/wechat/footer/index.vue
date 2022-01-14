@@ -139,6 +139,7 @@ const audioMove = (e: TouchEvent) => {
   audioXY.pageY = e.touches[0].pageY
 }
 const audioEnd = () => audioShow.value = false
+
 const getAudio = (blob: Blob) => blob.size && emits('sendBtn', blob, 3)
 
 // video 实时录像 4

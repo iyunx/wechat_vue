@@ -59,15 +59,21 @@ import vTrackDirective from './directives/track'
           close: 'white',
           written: 'white',
         }),
+        stream = ref<MediaStream>(),
         recorder = ref<MediaRecorder>(),
         blobs = ref<Blob>(),
         chunks = ref([]),
         body = {x: document.body.offsetWidth, y: document.body.offsetHeight},
         audioRef = ref<HTMLAudioElement>()
 
+  // 先获取权限
+  navigator.mediaDevices.getUserMedia({audio: true})
+    .then(str => stream.value = str)
+    .catch(err => console.log(err))
+
   watch(() => props.modelValue, (newBool, oldBool) => {
-    newBool && init()
-    !newBool && show.send && audioInfo()
+    newBool && audioStart()
+    !newBool && show.send && audioEnd()
   });
 
   watch(() => props.audioXY, (new1, old1) => {
@@ -94,25 +100,20 @@ import vTrackDirective from './directives/track'
     }
   }, {deep: true})
 
-  
-
-  const init = () => {
-    navigator.mediaDevices.getUserMedia({audio: true})
-    .then(stream => {
-      recorder.value = new MediaRecorder(stream)
-      recorder.value.start()
-      recorder.value.ondataavailable = e => chunks.value.push(e.data)
-    })
-    .catch(err => console.log(err))
-    
+  const audioStart = () => {
+    recorder.value = new MediaRecorder(stream.value)
+    recorder.value.start()
+    recorder.value.ondataavailable = e => chunks.value.push(e.data)
   }
 
-  const audioInfo = () => {
+  const audioEnd = () => {
     if(recorder.value){
       recorder.value.stop()
-      blobs.value = new Blob(chunks.value, { type: 'audio/webm'})
-      chunks.value = []
-      emits('getAudio', blobs.value)
+      setTimeout(() => {
+        blobs.value = new Blob(chunks.value, { type: 'audio/webm;codecs=opus'})
+        chunks.value = []
+        emits('getAudio', blobs.value)
+      }, 200)
     }
   }
   

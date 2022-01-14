@@ -1,5 +1,6 @@
-import socket from "../libs/socket";
 import { ref, reactive } from 'vue'
+import socket from "../libs/socket";
+import { groupUserUpdate } from '../api/group'
 
 /**
  * 加好友，提醒
@@ -33,6 +34,7 @@ const roomListBtn = (roomId: string, user: any, type = 1, msg = '') => {
   socket.emit('roomlist', roomId, user, type, msg)
 }
 socket.on('roomlist', data => {
+  console.log(data)
   /**
    * 注意，直接进入聊天室，roomlistArr.lists不含此聊天室，为空，
    * 只有通过首页进入此聊天室，聊天室才能通过room_id找到
