@@ -7,13 +7,15 @@ type TUser = {
   list: any[]
   myset: any
   base: any,
-  search: string
+  search: string,
+  isAdmin: boolean,
 }
 const users = reactive<TUser>({
   list: [],
   myset: {},
   base: {},
-  search: ''
+  search: '',
+  isAdmin: false
 })
 
 const old = ref<any[]>([])
@@ -43,6 +45,8 @@ const getUserList = async (id: string) => {
       }
     }
   })
+
+  users.isAdmin = isAdminFn()
 }
 
 const searchEnter = (e: KeyboardEvent) => {
@@ -53,8 +57,17 @@ const searchEnter = (e: KeyboardEvent) => {
   search.length == 0 && (users.list = old.value)
 }
 
+const isAdminFn = () => {
+  return users.myset.user_id == users.base.user_id
+    ? true
+    : users.base.admin_ids 
+      ? (users.base.admin_ids as Array<number>).includes(users.myset.id) 
+      : false
+}
+
 export {
   users,
   getUserList,
-  searchEnter
+  searchEnter,
+  isAdminFn
 }

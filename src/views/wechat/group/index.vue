@@ -19,7 +19,7 @@
       <router-link :to='`/group/${routeId}/list`'>查看更多群成员 <van-icon name="arrow" /> </router-link>
     </div>
     <ul class="base">
-      <li class="flex">
+      <li class="flex" @click="users.base.user_id == users.myset.user_id && (changeGroup.nameShow = true)">
         <span>群聊名称</span>
         <span>{{ users.base.name }} <van-icon name="arrow" /></span>
       </li>
@@ -32,14 +32,23 @@
           </aside>
         </li>
       </router-link>
-      <li class="flex">
+      <router-link :to='`/group/${routeId}/notice`' v-if="users.base.notice || users.isAdmin">
+        <li class="flex">
+          <article>
+            <span>群公告</span>
+            <p :style="{'margin-top': users.base.notice ? '.8rem' : ''}">{{users.base.notice ? users.base.notice.content : ''}}</p>
+          </article>
+          <van-icon name="arrow" />
+        </li>
+      </router-link>
+      <li class="flex" v-else @click="changeGroup.notice = true">
         <article>
           <span>群公告</span>
-          <p>{{users.base.notice}}</p>
+          <p :style="{'margin-top': users.base.notice ? '.8rem' : ''}">{{users.base.notice ? users.base.notice.content : ''}}</p>
         </article>
         <van-icon name="arrow" />
       </li>
-      <li class="flex" v-if="users.myset.id == users.base.user_id">
+      <li class="flex" v-if="users.isAdmin">
         <span>群管理</span>
         <van-icon name="arrow" />
       </li>
@@ -92,21 +101,60 @@
       <li>删除并退出</li>
     </ul>
   </main>
+  <van-popup 
+    v-model:show="changeGroup.nameShow"
+    round
+    :style="{ height: '30%', width: '80%' }"
+  >
+    <div class="group-name">
+      <h3>修改群聊名称</h3>
+      <span>修改群聊名称后，将在群内通知其他成员</span>
+      <van-field v-model="users.base.name" clearable right-icon="clear-icon"></van-field>
+      <van-button class="group-name-btn" type="success" @click="groupNameBtn">提交</van-button>
+    </div>
+  </van-popup>
+
+  <van-popup 
+    v-model:show="changeGroup.notice"
+    round
+    :style="{ height: '18%', width: '80%' }"
+  >
+    <div class="group-name">
+      <h3>只有群主及管理员可以编辑群公告</h3>
+      <van-button class="group-name-btn" type="success" @click="changeGroup.notice = false">知道了</van-button>
+    </div>
+  </van-popup>
 </template>
 
 <script lang='ts' setup>
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { Toast } from 'vant';
+import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router';
 import AppHeader from '../../layout/header.vue';
 import { users, getUserList } from './index';
+import { groupUpdate } from '../../../api/group'
 
 const router = useRoute(),
-      routeId = router.params.id,
+      routeId = router.params.id as string,
       lists = computed(() => users.list.slice(0, 4)),
-      checked = ref(false)
+      checked = ref(false),
+      changeGroup = reactive({
+        nameShow: false,
+        notice: false
+      })
 
 getUserList(routeId as string)
 
+const groupNameBtn = async () => {
+  if(users.base.user_id != users.myset.user_id) {
+    return Toast('只有管理员可修改群名称')
+  }
+  if(!users.base.name.length || users.base.name.length >= 20) {
+    return Toast('名称不能为空或长度不超过20')
+  }
+  await groupUpdate(routeId, {name: users.base.name as string})
+  changeGroup.nameShow = false
+}
 </script>
 
 <style lang='less' scoped>
@@ -127,6 +175,9 @@ getUserList(routeId as string)
   align-items: center;
   border-bottom: 1px solid #eee;
   padding: .8rem 0;
+  p{
+    color: #666;
+  }
 }
 .none{
   border-bottom: none;
@@ -206,6 +257,23 @@ getUserList(routeId as string)
     &:last-of-type{
       border-bottom: none;
     }
+  }
+}
+
+.group-name{
+  padding: 3%;
+  text-align: center;
+  h3{
+    text-align: center;
+    margin: 4% 0;
+  }
+  span{
+    font-size: .6rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  .group-name-btn{
+    margin-top: 2rem;
   }
 }
 </style>
