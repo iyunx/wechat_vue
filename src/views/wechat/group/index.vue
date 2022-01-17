@@ -143,7 +143,7 @@ const router = useRoute(),
         notice: false
       })
 
-getUserList(routeId as string)
+setTimeout(() => getUserList(routeId as string), 300)
 
 const groupNameBtn = async () => {
   if(users.base.user_id != users.myset.user_id) {
