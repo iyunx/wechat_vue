@@ -1,5 +1,5 @@
 <template>
-  <app-header :name="chatList.room.name">
+  <app-header :name="chatList.room.remark || chatList.room.name">
     <template #left>
       <router-link to='/'>
         <van-icon name="arrow-left" />

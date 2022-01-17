@@ -19,7 +19,7 @@
           </aside>
         </section>
         <article>
-          <h4>{{room.isGroup ? room.name : room.user.name}}</h4>
+          <h4>{{room.isGroup ? room.roomset.remark ? room.roomset.remark : room.name : room.user.name}}</h4>
           <p v-if='room.roomset.disturb'>{{room.roomset.num ? `[${room.roomset.num}条]`: ''}} {{room.chat.type < 2 ? room.chat.content.slice(0, 40) : room.chat.msg}}</p>
           <p v-else>{{room.roomset.num ? `[${room.roomset.num}条]`: ''}} {{room.chat.type < 2 ? room.chat.content.slice(0, 40) : room.chat.msg}}</p>
         </article>

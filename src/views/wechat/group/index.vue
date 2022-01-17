@@ -52,7 +52,7 @@
         <span>群管理</span>
         <van-icon name="arrow" />
       </li>
-      <li class="flex none">
+      <li class="flex none" @click="changeGroup.beizhu = true">
         <span>备注</span>
         <van-icon name="arrow" />
       </li>
@@ -64,11 +64,11 @@
     <ul class="set">
       <li class="flex">
         <span>消息免打扰</span>
-        <van-switch v-model="users.myset.disturb" size='1rem' />
+        <van-switch v-model="users.myset.disturb" @change="guUpdateBtn('disturb')" size='1rem' />
       </li>
       <li class="flex" v-if="users.myset.disturb">
         <span><van-icon name="minus" /> 折叠该群聊（待定）</span>
-        <van-switch v-model="users.myset.disturb" size='1rem' />
+        <van-switch v-model="checked" size='1rem' />
       </li>
       <li class="flex" v-if="users.myset.disturb">
         <span><van-icon name="minus" /> 关注的群成员</span>
@@ -76,7 +76,7 @@
       </li>
       <li class="flex">
         <span>置顶聊天</span>
-        <van-switch v-model="users.myset.top" size='1rem' />
+        <van-switch v-model="users.myset.top" @change="guUpdateBtn('top')" size='1rem' />
       </li>
       <li class="flex none">
         <span>保存到通讯录（待定）</span>
@@ -84,16 +84,16 @@
       </li>
     </ul>
     <ul class="nickname">
-      <li class="flex">
+      <li class="flex" @click="changeGroup.nicknameBool = true">
         <span>我在群内的昵称</span>
         <aside>
-          <span>{{users.myset.nickname ? users.myset.nickname : users.myset.name}}</span>
+          <span>{{changeGroup.nickname}}</span>
           <van-icon name="arrow" />
         </aside>
       </li>
       <li class="flex none">
         <span>显示群成员昵称</span>
-        <van-switch v-model="users.myset.shownick" size='1rem' />
+        <van-switch v-model="users.myset.shownick"  @change="guUpdateBtn('shownick')" size='1rem' />
       </li>
     </ul>
     <ul class="del">
@@ -101,6 +101,7 @@
       <li>删除并退出</li>
     </ul>
   </main>
+
   <van-popup 
     v-model:show="changeGroup.nameShow"
     round
@@ -108,9 +109,9 @@
   >
     <div class="group-name">
       <h3>修改群聊名称</h3>
-      <span>修改群聊名称后，将在群内通知其他成员</span>
-      <van-field v-model="users.base.name" clearable right-icon="clear-icon"></van-field>
-      <van-button class="group-name-btn" type="success" @click="groupNameBtn">提交</van-button>
+      <span>只在此群显示，群内成员可见</span>
+      <van-field v-model="users.myset.nickname" clearable right-icon="clear-icon"></van-field>
+      <van-button class="group-name-btn" type="success" @click="guUpdateBtn('nickname')">提交</van-button>
     </div>
   </van-popup>
 
@@ -124,6 +125,38 @@
       <van-button class="group-name-btn" type="success" @click="changeGroup.notice = false">知道了</van-button>
     </div>
   </van-popup>
+
+  <van-popup 
+    v-model:show="changeGroup.beizhu"
+    round
+    :style="{ height: '32%', width: '80%' }"
+  >
+    <div class="group-name">
+      <h3>备注</h3>
+      <span>群聊的备注仅自己可见</span>
+      <van-field v-model="users.myset.remark" />
+      <p style="text-align: left; margin-top: 1rem;">群聊名称: {{users.base.name}}</p>
+      <div class="group-name-btn">
+        <van-button type="success" @click="guUpdateBtn('remark')">提交</van-button>
+      </div>
+    </div>
+  </van-popup>
+
+  <van-popup 
+    v-model:show="changeGroup.nicknameBool"
+    round
+    :style="{ height: '32%', width: '80%' }"
+  >
+    <div class="group-name">
+      <h3>我在群内的昵称</h3>
+      <span>群聊的备注仅自己可见</span>
+      <van-field v-model="changeGroup.nickname" />
+      <div class="group-name-btn">
+        <van-button type="success" @click="guUpdateBtn('nickname')">提交</van-button>
+      </div>
+    </div>
+  </van-popup>
+
 </template>
 
 <script lang='ts' setup>
@@ -132,15 +165,25 @@ import { computed, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router';
 import AppHeader from '../../layout/header.vue';
 import { users, getUserList } from './index';
-import { groupUpdate } from '../../../api/group'
-
+import { groupUpdate, groupUserUpdate } from '../../../api/group'
+console.log(users)
 const router = useRoute(),
       routeId = router.params.id as string,
       lists = computed(() => users.list.slice(0, 4)),
       checked = ref(false),
       changeGroup = reactive({
         nameShow: false,
-        notice: false
+        notice: false,
+        beizhu: false,
+        nicknameBool: false,
+        nickname: computed({
+          get(){
+            return users.myset.nickname || users.myset.name
+          },
+          set(val: string){
+            users.myset.nickname = val
+          }
+        })
       })
 
 setTimeout(() => getUserList(routeId as string), 300)
@@ -154,6 +197,22 @@ const groupNameBtn = async () => {
   }
   await groupUpdate(routeId, {name: users.base.name as string})
   changeGroup.nameShow = false
+}
+
+const guUpdateBtn = async (type: string) => {
+  let value: string | boolean = false
+  if(type == 'remark'){
+    value = users.myset.remark
+    changeGroup.beizhu = false
+  }
+  if(type == 'nickname'){
+    value = users.myset.nickname
+    changeGroup.nicknameBool = false
+  }
+  type == 'disturb' && (value = users.myset.disturb)
+  type == 'top' && (value = users.myset.top)
+  type == 'shownick' && (value = users.myset.shownick)
+  await groupUserUpdate(routeId, { [type]: value})
 }
 </script>
 
@@ -262,7 +321,6 @@ const groupNameBtn = async () => {
 
 .group-name{
   padding: 3%;
-  text-align: center;
   h3{
     text-align: center;
     margin: 4% 0;
@@ -270,10 +328,16 @@ const groupNameBtn = async () => {
   span{
     font-size: .6rem;
     display: block;
+    text-align: center;
     margin-bottom: 1rem;
   }
   .group-name-btn{
     margin-top: 2rem;
+    text-align: center;
+  }
+  p{
+    text-align: center;
+    font-size: .8rem;
   }
 }
 </style>
