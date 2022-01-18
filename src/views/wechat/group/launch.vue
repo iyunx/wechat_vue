@@ -61,7 +61,6 @@ import { groupStore, groupJoin } from '../../../api/group';
 import { groupListBtn, removeUser } from '../../../api/socket';
 import { users as userList } from './index'
 import { Toast } from 'vant';
-import { roomlistArr } from '../../../api/socket';
 
 const search = reactive({
         value: '',

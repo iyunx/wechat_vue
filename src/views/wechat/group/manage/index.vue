@@ -29,9 +29,9 @@
 
 <script lang='ts' setup>
 import { reactive } from 'vue'
-import appHeader from '../../layout/header.vue'
-import { users } from './index'
-import { groupUpdate } from '../../../api/group'
+import appHeader from '../../../layout/header.vue'
+import { users } from '../index'
+import { groupUpdate } from '../../../../api/group'
 
 const groupUP = async () => {
   await groupUpdate(users.base.id, {allow: users.base.allow})
