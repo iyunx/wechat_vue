@@ -48,10 +48,12 @@
         </article>
         <van-icon name="arrow" />
       </li>
-      <li class="flex" v-if="users.isAdmin">
-        <span>群管理</span>
-        <van-icon name="arrow" />
-      </li>
+      <router-link :to="`/group/${routeId}/manage`">
+        <li class="flex" v-if="users.isAdmin">
+          <span>群管理</span>
+          <van-icon name="arrow" />
+        </li>
+      </router-link>
       <li class="flex none" @click="changeGroup.beizhu = true">
         <span>备注</span>
         <van-icon name="arrow" />
@@ -106,12 +108,13 @@
     v-model:show="changeGroup.nameShow"
     round
     :style="{ height: '30%', width: '80%' }"
+    @open="changeGroup.name = users.base.name"
   >
-    <div class="group-name">
+    <div class="group-name" style="text-align: center;">
       <h3>修改群聊名称</h3>
       <span>只在此群显示，群内成员可见</span>
-      <van-field v-model="users.myset.nickname" clearable right-icon="clear-icon"></van-field>
-      <van-button class="group-name-btn" type="success" @click="guUpdateBtn('nickname')">提交</van-button>
+      <van-field v-model="changeGroup.name" clearable right-icon="clear-icon"></van-field>
+      <van-button class="group-name-btn" type="success" @click="groupNameBtn">提交</van-button>
     </div>
   </van-popup>
 
@@ -166,13 +169,14 @@ import { useRoute } from 'vue-router';
 import AppHeader from '../../layout/header.vue';
 import { users, getUserList } from './index';
 import { groupUpdate, groupUserUpdate } from '../../../api/group'
-console.log(users)
+
 const router = useRoute(),
       routeId = router.params.id as string,
       lists = computed(() => users.list.slice(0, 4)),
       checked = ref(false),
       changeGroup = reactive({
         nameShow: false,
+        name: '',
         notice: false,
         beizhu: false,
         nicknameBool: false,
@@ -195,7 +199,8 @@ const groupNameBtn = async () => {
   if(!users.base.name.length || users.base.name.length >= 20) {
     return Toast('名称不能为空或长度不超过20')
   }
-  await groupUpdate(routeId, {name: users.base.name as string})
+  await groupUpdate(routeId, {name: changeGroup.name})
+  users.base.name = changeGroup.name
   changeGroup.nameShow = false
 }
 

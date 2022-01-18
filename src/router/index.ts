@@ -7,13 +7,14 @@ const routes = [
   
   {path: '/room/:id', name: 'room', component: () => import('../views/wechat/show.vue')},
   {path: '/room/launch', name: 'room.launch', component: () => import('../views/wechat/group/launch.vue')},
+  {path: '/group/:id/uchange', name: 'group.uchange', component: () => import('../views/wechat/group/launch.vue')},
   {path: '/group/:id', name: 'group.show', component: () => import('../views/wechat/group.vue')},
   {path: '/group/:id/index', name: 'group.index', component: () => import('../views/wechat/group/index.vue')},
   {path: '/group/:id/list', name: 'group.list', component: () => import('../views/wechat/group/list.vue')},
   {path: '/group/:id/erwei', name: 'group.erwei', component: () => import('../views/wechat/group/erweima.vue')},
   {path: '/group/:id/join', name: 'group.join', component: () => import('../views/wechat/group/join.vue')},
-  {path: '/group/:id/uchange', name: 'group.uchange', component: () => import('../views/wechat/group/launch.vue')},
   {path: '/group/:id/notice', name: 'group.notice', component: () => import('../views/wechat/group/notice.vue')},
+  {path: '/group/:id/manage', name: 'group.manage', component: () => import('../views/wechat/group/manage.vue')},
 
   {path: '/user/:id(\\d+$)', name: 'user', component: () => import('../views/user/show.vue')},
   {path: '/user/search', name: 'user.search', component: () => import('../views/user/search.vue')},
