@@ -12,13 +12,16 @@
       </section>
 
       <section class="pd manage-top">
-        <div class="manage-flex">
+        <router-link to="/manage/adminer" class="manage-flex">
           <span>群主管理权限转让</span>
           <van-icon name="arrow" />
-        </div>
+        </router-link>
       </section>
-
-      <section class="pd manage-top">群管理员</section>
+      
+      <router-link to="/manage/adminer">
+        <section class="pd manage-top">群管理员</section>
+      </router-link>
+      
 
       <section class="pd manage-top" style="text-align: center; color: red;">
         <span>解散该群聊</span>

@@ -48,8 +48,8 @@
         </article>
         <van-icon name="arrow" />
       </li>
-      <router-link :to="`/group/${routeId}/manage`">
-        <li class="flex" v-if="users.isAdmin">
+      <router-link to="/manage" v-if="users.base.user_id == users.myset.user_id">
+        <li class="flex">
           <span>群管理</span>
           <van-icon name="arrow" />
         </li>
@@ -169,7 +169,7 @@ import { useRoute } from 'vue-router';
 import AppHeader from '../../layout/header.vue';
 import { users, getUserList } from './index';
 import { groupUpdate, groupUserUpdate } from '../../../api/group'
-
+console.log(users)
 const router = useRoute(),
       routeId = router.params.id as string,
       lists = computed(() => users.list.slice(0, 4)),

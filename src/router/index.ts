@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { TOKEN } from '../libs/vuex'
 
 const routes = [
   {path: '/', name: 'home', component: () => import('../views/index.vue')},
@@ -14,7 +15,9 @@ const routes = [
   {path: '/group/:id/erwei', name: 'group.erwei', component: () => import('../views/wechat/group/erweima.vue')},
   {path: '/group/:id/join', name: 'group.join', component: () => import('../views/wechat/group/join.vue')},
   {path: '/group/:id/notice', name: 'group.notice', component: () => import('../views/wechat/group/notice.vue')},
-  {path: '/group/:id/manage', name: 'group.manage', component: () => import('../views/wechat/group/manage/index.vue')},
+  {path: '/manage', name: 'manage', component: () => import('../views/wechat/group/manage/index.vue')},
+  {path: '/manage/adminer', name: 'manage.adminer', component: () => import('../views/wechat/group/manage/manager.vue')},
+  {path: '/manage/list', name: 'manage.list', component: () => import('../views/wechat/group/manage/list.vue')},
 
   {path: '/user/:id(\\d+$)', name: 'user', component: () => import('../views/user/show.vue')},
   {path: '/user/search', name: 'user.search', component: () => import('../views/user/search.vue')},
@@ -27,5 +30,13 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+// router.beforeEach((to, from) => {
+//   if(!TOKEN.value) {
+//     return router.push({name: 'login'})
+//   }
+//   // ...
+//   // 返回 false 以取消导航
+// })
 
 export default router

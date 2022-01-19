@@ -2,20 +2,39 @@ import { reactive, ref } from 'vue'
 import { groupIndex } from '../../../api/group';
 import { USER } from '../../../libs/vuex';
 const me = USER.value
-
+type TUBase = {
+  id: string,
+  name: string,
+  avatar: string,
+  user_id: number,
+  user_ids: number[],
+  admin_ids?: number[] | null,
+  allow: boolean,
+  notice?: object | null,
+  qrcode?: string | null
+}
 type TUser = {
   list: any[]
   myset: any
-  base: any,
+  base: TUBase,
   search: string,
   isAdmin: boolean,
+  adminer: any[]
 }
 const users = reactive<TUser>({
   list: [],
   myset: {},
-  base: {},
+  base: {
+    id: '',
+    name: '',
+    avatar: '',
+    user_id: 0,
+    user_ids: [],
+    allow: false,
+  },
   search: '',
-  isAdmin: false
+  isAdmin: false,
+  adminer: [],
 })
 
 const old = ref<any[]>([])
@@ -44,9 +63,11 @@ const getUserList = async (id: string) => {
         avatar: item.avatar,
       }
     }
+    item.isAdmin = isAdminFn(item.id)
   })
 
-  users.isAdmin = isAdminFn()
+  users.isAdmin = isAdminFn(users.myset.id)
+  users.adminer = users.list.filter(u => u.isAdmin)
 }
 
 const searchEnter = (e: KeyboardEvent) => {
@@ -57,11 +78,11 @@ const searchEnter = (e: KeyboardEvent) => {
   search.length == 0 && (users.list = old.value)
 }
 
-const isAdminFn = () => {
-  return users.myset.user_id == users.base.user_id
+const isAdminFn = (id: number) => {
+  return id == users.base.user_id
     ? true
-    : users.base.admin_ids 
-      ? (users.base.admin_ids as Array<number>).includes(users.myset.id) 
+    : users.base.admin_ids && (users.base.admin_ids as Array<number>).includes(id) 
+      ? true
       : false
 }
 
