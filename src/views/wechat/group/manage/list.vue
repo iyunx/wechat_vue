@@ -49,7 +49,7 @@ const addBtn = async () => {
   if(data) {
     users.base.admin_ids = data.admin_ids
     users.list.forEach(u => u.isAdmin = isAdminFn(u.id))
-    users.adminer = users.list.filter(u => u.isAdmin)
+    users.adminer = users.list.filter(u => u.isAdmin && u.id != users.base.user_id)
     router.replace('/manage/adminer')
   }
 }

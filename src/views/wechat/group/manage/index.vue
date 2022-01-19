@@ -21,7 +21,6 @@
       <router-link to="/manage/adminer">
         <section class="pd manage-top">群管理员</section>
       </router-link>
-      
 
       <section class="pd manage-top" style="text-align: center; color: red;">
         <span>解散该群聊</span>

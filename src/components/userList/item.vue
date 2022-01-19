@@ -31,9 +31,6 @@ const props = defineProps({
     default: true
   }
 })
-
-
-const checked = ref(false)
 </script>
 
 <style lang='less' scoped>

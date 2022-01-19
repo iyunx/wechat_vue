@@ -2,8 +2,9 @@
   <app-header icon-back name="管理员转让">
   </app-header>
   <div class="init">
-    <user-list :users="users.exLeaderList" />
+    <user-list :users="users.exLeaderList" @transfer="transferAdmin" />
   </div>
+  <van-popup v-model:show="show">内容</van-popup>
 </template>
 
 <script lang='ts' setup>
@@ -18,8 +19,9 @@ const router = useRouter(),
       route = useRoute(),
       show = ref(false)
 
-const addBtn = async () => {
-  // const data = await groupUpdate(users.base.id, {user_id: checked.value})
+const transferAdmin = async (val: {name: string, id: number}) => {
+  show.value = true
+  const data = await groupUpdate(users.base.id, {user_id: val.id})
 }
 
 </script>

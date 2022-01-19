@@ -1,7 +1,7 @@
 <template>
   <ul class="user-box">
-    <template v-for="user in users">
-      <li class="user-base" >
+    <template v-for="user in users" :key="user.id">
+      <li class="user-base" @click="$emit('transfer', {id: user.id, name: user.name})">
         <img :src="user.avatar">
         <span>{{user.name}}</span>
       </li>
@@ -11,19 +11,13 @@
 
 <script lang='ts' setup>
 import { PropType, reactive } from 'vue'
-const props = defineProps({
+defineProps({
   users: {
     type: Array as PropType<{id: number, name: string, avatar: string}[]>,
-    default(){
-      return {
-        id: 0,
-        name: '',
-        avatar: ''
-      }
-    }
+    default: []
   }
 })
-console.log(props.users)
+
 </script>
 
 <style lang='less' scoped>
