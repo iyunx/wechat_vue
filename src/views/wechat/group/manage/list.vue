@@ -12,18 +12,18 @@
   <div class="init">
     <user-index v-model="checked">
       <template v-for="user in userAll" :key="user.id">
-        <user-list v-if="user.id != users.myset.id" :user="user" :changeBool="changeBool" />
+        <user-item :user="user" :changeBool="changeBool" />
       </template> 
     </user-index>
   </div>
 </template>
 
 <script lang='ts' setup>
-import { computed, ref, watchEffect } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import appHeader from '../../../layout/header.vue'
 import userIndex from '../../../../components/userList/index.vue'
-import userList from '../../../../components/userList/list.vue'
+import userItem from '../../../../components/userList/item.vue'
 import { users, isAdminFn } from '../index'
 import { groupUpdate } from '../../../../api/group'
 
@@ -41,7 +41,7 @@ const us = changeBool ? users.list.filter(u => {
 
 const checkLen = computed(() => checked.value.length - us.length)
 
-const userAll = changeBool ? users.list : users.adminer
+const userAll = changeBool ? users.exLeaderList : users.adminer
 
 const addBtn = async () => {
   let adminIds = changeBool ? checked.value : users.base.admin_ids.filter(id => !(new Set(checked.value)).has(id))

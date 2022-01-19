@@ -1,53 +1,43 @@
 <template>
-  <van-checkbox class="user-box" :name="user.id" :disabled="changeBool && user.isAdmin">
-    <div class="user-base">
-      <img :src="user.avatar">
-      <span>{{user.name}}</span>
-    </div>
-  </van-checkbox>
+  <ul class="user-box">
+    <template v-for="user in users">
+      <li class="user-base" >
+        <img :src="user.avatar">
+        <span>{{user.name}}</span>
+      </li>
+    </template>
+  </ul>
 </template>
 
 <script lang='ts' setup>
-import { PropType, ref } from 'vue'
-type TUser = {
-  id: number,
-  name: string,
-  avatar: string,
-  isAdmin: boolean
-}
+import { PropType, reactive } from 'vue'
 const props = defineProps({
-  user: {
-    type: Object as PropType<TUser>,
+  users: {
+    type: Array as PropType<{id: number, name: string, avatar: string}[]>,
     default(){
       return {
         id: 0,
-        avatar: '',
-        name: ''
+        name: '',
+        avatar: ''
       }
     }
-  },
-  changeBool: {
-    type: Boolean,
-    default: true
   }
 })
-
-
-const checked = ref(false)
+console.log(props.users)
 </script>
 
 <style lang='less' scoped>
 .user-box{
-  padding: 0 3%;
-  margin-top: .8rem;
+  padding-left: 3%;
   .user-base{
-    width: 100vw;
     display: flex;
     align-items: center;
+    margin-top: 1rem;
     img{
       width: 2.6rem;
       height: 2.6rem;
-      margin: 0 .6rem;
+      margin-right: .6rem;
+      border-radius: .2rem;
     }
     span{
       flex: 1;

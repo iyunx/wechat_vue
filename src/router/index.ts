@@ -18,6 +18,7 @@ const routes = [
   {path: '/manage', name: 'manage', component: () => import('../views/wechat/group/manage/index.vue')},
   {path: '/manage/adminer', name: 'manage.adminer', component: () => import('../views/wechat/group/manage/manager.vue')},
   {path: '/manage/list', name: 'manage.list', component: () => import('../views/wechat/group/manage/list.vue')},
+  {path: '/manage/admintran', name: 'manage.adminTran', component: () => import('../views/wechat/group/manage/adminTran.vue')},
 
   {path: '/user/:id(\\d+$)', name: 'user', component: () => import('../views/user/show.vue')},
   {path: '/user/search', name: 'user.search', component: () => import('../views/user/search.vue')},

@@ -19,7 +19,8 @@ type TUser = {
   base: TUBase,
   search: string,
   isAdmin: boolean,
-  adminer: any[]
+  adminer: any[],
+  exLeaderList: any[],
 }
 const users = reactive<TUser>({
   list: [],
@@ -35,6 +36,7 @@ const users = reactive<TUser>({
   search: '',
   isAdmin: false,
   adminer: [],
+  exLeaderList: [],
 })
 
 const old = ref<any[]>([])
@@ -67,7 +69,10 @@ const getUserList = async (id: string) => {
   })
 
   users.isAdmin = isAdminFn(users.myset.id)
-  users.adminer = users.list.filter(u => u.isAdmin)
+  // 不含群主的所有管理员列表
+  users.adminer = users.list.filter(u => u.isAdmin && u.id != users.base.user_id)
+  // 不含群主的所有群友列表
+  users.exLeaderList = users.list.filter(u => u.id != users.base.user_id)
 }
 
 const searchEnter = (e: KeyboardEvent) => {
@@ -90,5 +95,5 @@ export {
   users,
   getUserList,
   searchEnter,
-  isAdminFn
+  isAdminFn,
 }

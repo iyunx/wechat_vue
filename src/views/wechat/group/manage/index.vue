@@ -12,7 +12,7 @@
       </section>
 
       <section class="pd manage-top">
-        <router-link to="/manage/adminer" class="manage-flex">
+        <router-link to="/manage/admintran" class="manage-flex">
           <span>群主管理权限转让</span>
           <van-icon name="arrow" />
         </router-link>
