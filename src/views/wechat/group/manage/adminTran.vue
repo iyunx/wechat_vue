@@ -20,7 +20,6 @@ import { users } from '../index'
 import { groupUpdate } from '../../../../api/group'
 
 const router = useRouter(),
-      route = useRoute(),
       show = ref(false),
       newAdmin = reactive({
         name: '',
@@ -35,7 +34,7 @@ const transferAdmin =  (val: {name: string, id: number}) => {
 
 const sureBtn = async () => {
   const data = await groupUpdate(users.base.id, {user_id: newAdmin.id})
-  console.log(data)
+  if(data) router.replace(`/group/${users.base.id}/index`)
 }
 </script>
 
