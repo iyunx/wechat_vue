@@ -4,11 +4,15 @@
   <div class="init">
     <user-list :users="users.exLeaderList" @transfer="transferAdmin" />
   </div>
-  <van-popup v-model:show="show">内容</van-popup>
+  <van-popup round v-model:show="show" teleport="body" :style="{ width: '70%' }">
+    <div class="info">确定选择 {{newAdmin.name}} 为新群主，你将自动放弃群主身份。</div>
+    <van-button style="width: 50%;" @click="show = false">取消</van-button>
+    <van-button @click="sureBtn" style="width: 50%;">确定</van-button>
+  </van-popup>
 </template>
 
 <script lang='ts' setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import appHeader from '../../../layout/header.vue'
 import userList from '../../../../components/userList/list.vue'
@@ -17,15 +21,30 @@ import { groupUpdate } from '../../../../api/group'
 
 const router = useRouter(),
       route = useRoute(),
-      show = ref(false)
+      show = ref(false),
+      newAdmin = reactive({
+        name: '',
+        id: 0
+      })
 
-const transferAdmin = async (val: {name: string, id: number}) => {
+const transferAdmin =  (val: {name: string, id: number}) => {
   show.value = true
-  const data = await groupUpdate(users.base.id, {user_id: val.id})
+  newAdmin.id = val.id;
+  newAdmin.name = val.name
 }
 
+const sureBtn = async () => {
+  const data = await groupUpdate(users.base.id, {user_id: newAdmin.id})
+  console.log(data)
+}
 </script>
 
 <style lang='less' scoped>
-
+.box{
+  border-radius: 5px;
+}
+.info{
+  padding: 1rem;
+  font-size: .9rem;
+}
 </style>

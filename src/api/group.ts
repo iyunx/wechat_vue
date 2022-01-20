@@ -14,7 +14,6 @@ const groupStore = async (arr: Array<number>) => {
 // 群管理
 const groupUpdate = async <T>(id: string, manage: T) => {
   const data = ((await axios.put(`/group/update/${id}`, manage)).data) as IMessage
-  // if(data.code == 400) return Toast(data.msg)
   return data.data
 }
 // 群聊天页面
