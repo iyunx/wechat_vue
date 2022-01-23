@@ -101,9 +101,13 @@ import vTrackDirective from './directives/track'
   }, {deep: true})
 
   const audioStart = () => {
-    recorder.value = new MediaRecorder(stream.value)
-    recorder.value.start()
-    recorder.value.ondataavailable = e => chunks.value.push(e.data)
+    try {
+      recorder.value = new MediaRecorder(stream.value)
+      recorder.value.start()
+      recorder.value.ondataavailable = e => chunks.value.push(e.data)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const audioEnd = () => {

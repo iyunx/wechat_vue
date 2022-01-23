@@ -9,7 +9,14 @@
           </aside>
 
           <section>
-            <button v-if="state.isAudio">按住 说话</button>
+            <van-button
+              size="small"
+              block
+              v-if="state.isAudio"
+              @touchstart="audioStart"
+              @touchmove="audioMove"
+              @touchend="audioEnd"
+            >按住 说话</van-button>
             <edit-input
               v-model='editInputValue.input'
               v-show='state.isInput'
@@ -58,12 +65,6 @@
       </div>
     </transition>
   </div>
-  <button
-    style="position: absolute; z-index: 101; bottom: 0;"
-    @touchstart="audioStart"
-    @touchmove="audioMove"
-    @touchend="audioEnd"
-  >123123123</button>
   <app-audio v-model="audioShow" :audioXY="audioXY" @getAudio="getAudio"></app-audio>
 </template>
 
