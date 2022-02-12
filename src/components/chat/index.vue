@@ -8,12 +8,16 @@
         </div>
         <li v-else :class="{current: item.user_id === me.id}">
           <aside>
-            <router-link to='/'><img class="avatar" :src="item.user.avatar"></router-link>
+            <router-link to='/'><van-image class="avatar" :src="item.user.avatar" /></router-link>
           </aside>
           <section>
             <article v-if="item.type === 1" v-html='item.content'></article>
             <div v-else>
-              <img v-if="item.type === 2" :src="item.content" @click="imgOpenBtn(item.content)">
+              <van-image v-if="item.type === 2" :src="item.content" @click="imgOpenBtn(item.content)">
+                <template v-slot:loading>
+                  <van-loading type="spinner" size="20" />
+                </template>
+              </van-image>
               <video v-if="item.type === 3" :src="item.content" controls></video>
               <a :href='item.content.url' class="file" v-if="item.type === 4">
                 <div class="file-flex">
@@ -43,7 +47,7 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted, PropType, ref, watchEffect } from 'vue'
+import { onMounted, PropType, ref } from 'vue'
 import { TLists } from '../../views/wechat/types';
 import moment from '../../libs/moment'
 import { USER } from '../../libs/vuex';

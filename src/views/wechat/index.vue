@@ -8,9 +8,9 @@
         @touchend="touchEnd($event, room.id, room.isGroup)">
         <section>
           <div class="img">
-            <img v-if="!room.isGroup" class="avatar" :src="room.user.avatar" :alt="room.user.name">
+            <van-image v-if="!room.isGroup" class="avatar" :src="room.user.avatar" />
             <div class="avagird" v-else>
-              <img v-for="(img, i) in room.img" :key="i" :src="img" alt="">
+              <van-image v-for="(img, i) in room.img" :key="i" :src="img" />
             </div>
           </div>
           <aside v-if="room.roomset.disturb" :class="{'notify1': room.roomset.num}"></aside>

@@ -11,15 +11,22 @@
       </router-link>
     </template>
   </app-header>
-  <app-chat
-    :lists="chatList.lists"
-    :count="chatList.count"
-    :swiper="imgSwiper"
-    @domRef='getChatDom'
-    @onRefresh='onRefresh'
-    @swiper='swiperBtn'
-  >
-  </app-chat>
+  <suspense>
+    <template #default>
+      <app-chat
+        :lists="chatList.lists"
+        :count="chatList.count"
+        :swiper="imgSwiper"
+        @domRef='getChatDom'
+        @onRefresh='onRefresh'
+        @swiper='swiperBtn'
+      >
+      </app-chat>
+    </template>
+    <template v-slot:fallback>
+      <van-loading type="spinner" size="30" />
+    </template>
+  </suspense>
   <app-footer v-model:dom='chatDom' @sendBtn='sendBtn'></app-footer>
 </template>
 
@@ -65,7 +72,6 @@ const getChatLists = async () => {
   chatList.room.id = data.group.group.id
   chatList.room.name = data.group.group.name
   Reflect.deleteProperty(chatList.room, 'group')
-  console.log(chatList)
   // 进入群聊
   roomJoin(roomId)
   
@@ -75,6 +81,7 @@ const getChatLists = async () => {
     if(item.type >= 2 && item.type < 4) imgSwiper.images.push(item.content)
   })
 }
+getChatLists()
 
 // 下拉加载
 const onRefresh = () => {
@@ -137,12 +144,12 @@ const groupListBtn = (gid: string, type: number, val: string) => {
 }
 // 0系统信息，1文字，2本地(图，音乐，食品，文件等)，3实时录音
 const sendBtn = async (val: any, type: number) => {
-  if(type == 1){
+  if(type === 1){
     chatListBtn(val, roomId, type) // 房间内页
     groupListBtn(roomId, type, val) // 房间列表页
   }
 
-  if(type == 2){
+  if(type === 2){
     const tp = val[Object.values(val).length - 1].type.split('/')[0]
     const typelist = [
       {id: 2, type: 'image', title: '[图片]'},
@@ -167,7 +174,7 @@ const sendBtn = async (val: any, type: number) => {
     groupListBtn(roomId, ty.id, ty.title)
   }
   
-  if (type == 3) {
+  if (type === 3) {
     const audioForm = new FormData()
     audioForm.append('files', val)
     audioForm.set('room_id', roomId)
@@ -189,20 +196,17 @@ const getChatDom = (val: HTMLUListElement) => {
 }
 // 滚动条在最底部
 const setScrollTop = (dom: HTMLUListElement) => {
-  nextTick(() => dom && (dom.scrollTop = dom.scrollHeight))
+  nextTick(() => dom.scrollTop = dom.scrollHeight)
 }
 
 const swiperBtn = (val: boolean) => imgSwiper.show = val
 
 onMounted(() => {
   // roomlistArr是通过首页获取内容的，其他页面刷新丢失
-  setTimeout(() => {
-    getChatLists()
-    .then(() => {
-      setScrollTop(chatDom.value as HTMLUListElement)
-      setTimeout(() => setScrollTop(chatDom.value as HTMLUListElement), 100)
-    })
-  }, 150)
+  if(chatDom.value){
+    setScrollTop(chatDom.value)
+    setTimeout(() => setScrollTop(chatDom.value), 100)
+  }
 })
 // 未读消息设定为已读
 const updateContact = async (num = 0) => await groupUserUpdate(roomId, {num})

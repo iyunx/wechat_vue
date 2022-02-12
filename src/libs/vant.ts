@@ -13,7 +13,10 @@ import {
   ImagePreview,
   PullRefresh,
   CheckboxGroup, Checkbox,
-  Overlay
+  Overlay,
+  Image as VanImage,
+  Loading,
+  Lazyload
 } from 'vant'
 
 const vants = [
@@ -29,7 +32,10 @@ const vants = [
   ImagePreview,
   PullRefresh,
   CheckboxGroup, Checkbox,
-  Overlay
+  Overlay,
+  VanImage,
+  Loading,
+  Lazyload
 ]
 
 export default {
